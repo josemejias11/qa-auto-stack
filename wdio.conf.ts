@@ -54,16 +54,18 @@ const capabilityCatalog: Record<string, BrowserCaps> = {
     acceptInsecureCerts: true,
     maxInstances: 1,
     // Add Safari-specific timeouts and options
-    ...(process.env.CI ? {
-      'safari:options': {
-        cleanSession: true,
-      },
-      timeouts: {
-        implicit: 30000,
-        pageLoad: 60000,
-        script: 30000,
-      },
-    } : {}),
+    ...(process.env.CI
+      ? {
+          'safari:options': {
+            cleanSession: true,
+          },
+          timeouts: {
+            implicit: 30000,
+            pageLoad: 60000,
+            script: 30000,
+          },
+        }
+      : {}),
   },
 };
 

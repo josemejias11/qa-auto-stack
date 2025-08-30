@@ -19,7 +19,7 @@ describe('Functional: Product Videos Playback', () => {
     it(`verifies video playback probe for ${url}`, async function () {
       // Increase timeout for video tests to 120 seconds
       this.timeout(120000);
-      
+
       const res = await playAndProbeVideo({ url, strict });
       console.log(
         `[DEBUG] ${url} - mode: ${res.mode}, played: ${res.played}, delta: ${res.delta}, before: ${res.before}, after: ${res.after}, reason: ${res.reason}`
