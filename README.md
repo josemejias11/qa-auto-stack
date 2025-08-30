@@ -148,33 +148,6 @@ npm run clean
 npm run clean:reports
 ```
 
-## Project Structure
-
-```
-src/              # Source code
-tests/            # Test specifications
-  ├── smoke/      # Quick validation tests
-  ├── accessibility/ # A11y tests
-  ├── forms/      # Form interaction tests
-  ├── links/      # Link health tests
-  └── functional/ # Feature-specific tests
-postman/          # API test collections
-reports/          # Generated test reports
-scripts/          # Utility scripts
-examples/         # Usage examples
-```
-
-## Parallel Execution
-
-The framework supports parallel browser execution with shared cache optimization:
-
-- **Chrome**: 2 parallel instances with disk/media cache
-- **Firefox**: 2 parallel instances with cache preferences
-- **Safari**: 1 instance (Safari limitations)
-
-Tests run significantly faster with parallel execution while maintaining reliability.
-```
-
 ## Video Testing
 
 The project includes comprehensive video playback testing for Newsela product pages:
@@ -182,7 +155,7 @@ The project includes comprehensive video playback testing for Newsela product pa
 - **Wistia Integration**: Detects and validates Wistia video players
 - **Cross-Browser**: Tests video functionality across Chrome, Firefox, and Safari
 - **Smart Detection**: Identifies video infrastructure and validates playback capability
-- **Product Coverage**: Tests all main product pages (ELA, Social Studies, Science, Writing, Formative)
+- **Product Coverage**: Tests all pages with videos present (ELA, Social Studies, Science, Writing, Formative)
 
 Run video tests:
 
@@ -222,22 +195,6 @@ npm run mcp:server
 - `format`: format code with Prettier
 - `format:check`: check code formatting
 
-### Testing
-
-- `test`: full test suite on all browsers (Chrome, Firefox, Safari) + generate & open Allure
-- `test:chrome`: run tests on Chrome only
-- `test:firefox`: run tests on Firefox only
-- `test:safari`: run tests on Safari only
-- `test:observe`: headed multi-browser with observe pauses (set OBSERVE=1 / OBSERVE_END=1)
-
-### Specific Test Suites
-
-- `test:smoke`: smoke spec only
-- `test:a11y`: accessibility spec only
-- `test:links`: link health spec
-- `test:forms`: form spec
-- `test:video`: video playback validation across all browsers
-
 ### Reporting
 
 - `allure:generate`: build static report from allure-results
@@ -250,16 +207,6 @@ npm run mcp:server
 - `demo`: run sample script in examples/
 - `validate:workflow`: YAML workflow validator script
 
-## Environment Variables
-
-- `BROWSERS=chrome,firefox,safari` (default: chrome)
-- `HEADLESS=1` (force headless for chrome/firefox)
-- `OBSERVE=1` (slow start & end pauses) + `OBSERVE_END=1`
-- `LOG_LEVEL=debug` (override WDIO log level)
-- `SAFARI_TP=1` (use Safari Technology Preview)
-- `SKIP_ALLURE_OPEN=1` (suppress auto-open of report)
-- `CI` (enables single retry for flaky specs)
-
 ## Reports
 
 Generated under `reports/`:
@@ -271,18 +218,6 @@ Generated under `reports/`:
 - `chromedriver` / `geckodriver` logs
 - `screenshots` (only on failure)
 
-## Directory Layout
-
-- `src/` : MCP server code & utilities
-- `tests/` : spec files grouped by domain
-  - `smoke/` : basic functionality tests
-  - `accessibility/` : a11y validation tests
-  - `links/` : link health checks
-  - `forms/` : form interaction tests
-  - `functional/` : advanced feature tests (e.g., video playback)
-  - `helpers/` : reusable test utilities
-- `scripts/` : utility scripts (clean-reports, validate-workflow)
-- `examples/` : demo usage
 - `reports/` : output artifacts (gitignored except keep files)
 
 ## Failure Artifacts

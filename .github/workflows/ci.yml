@@ -49,8 +49,8 @@ jobs:
           path: dist/
           retention-days: 30
 
-  wdio-all-browsers:
-    name: WebDriverIO (All Browsers)
+  test-chrome:
+    name: WebDriverIO (Chrome)
     needs: lint-and-build
     runs-on: macos-latest
     steps:
@@ -74,39 +74,98 @@ jobs:
         with:
           chrome-version: ${{ env.CHROME_VERSION }}
 
+      - name: Run Chrome tests
+        env:
+          BROWSERS: chrome
+          HEADLESS: 1
+          LOG_LEVEL: info
+          SKIP_ALLURE_OPEN: 1
+        run: npm run test:chrome
+
+      - name: Upload Chrome test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports-chrome
+          path: reports/
+          retention-days: 30
+
+  test-firefox:
+    name: WebDriverIO (Firefox)
+    needs: lint-and-build
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
       - name: Setup Firefox
         uses: browser-actions/setup-firefox@v1
         with:
           firefox-version: 'latest'
 
-      - name: Enable safaridriver
-        run: sudo safaridriver --enable
-
-      - name: Run tests (Chrome)
-        env:
-          BROWSERS: chrome
-          HEADLESS: 1
-          LOG_LEVEL: info
-        run: npm test
-
-      - name: Run tests (Firefox)
+      - name: Run Firefox tests
         env:
           BROWSERS: firefox
           HEADLESS: 1
           LOG_LEVEL: info
-        run: npm test
+          SKIP_ALLURE_OPEN: 1
+        run: npm run test:firefox
 
-      - name: Run tests (Safari)
-        env:
-          BROWSERS: safari
-          LOG_LEVEL: debug
-        run: npm test
-
-      - name: Upload test reports
+      - name: Upload Firefox test reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-reports-all-browsers
+          name: test-reports-firefox
+          path: reports/
+          retention-days: 30
+
+  test-safari:
+    name: WebDriverIO (Safari)
+    needs: lint-and-build
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
+      - name: Enable safaridriver
+        run: sudo safaridriver --enable
+
+      - name: Run Safari tests
+        env:
+          BROWSERS: safari
+          LOG_LEVEL: debug
+          SKIP_ALLURE_OPEN: 1
+        run: npm run test:safari
+
+      - name: Upload Safari test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports-safari
           path: reports/
           retention-days: 30
 
@@ -201,7 +260,7 @@ jobs:
       - name: Run Postman smoke tests (Newsela public)
         run: |
           mkdir -p reports/api
-          npm run postman:test
+          npm run test:api
 
       - name: Upload Postman results
         if: always()
@@ -238,16 +297,28 @@ jobs:
 
   generate-reports:
     name: Aggregate Test Reports
-    needs: [wdio-all-browsers, mcp-server-validation]
+    needs: [test-chrome, test-firefox, test-safari, mcp-server-validation]
     runs-on: ubuntu-latest
     if: always()
 
     steps:
-      - name: Download All Browsers reports
+      - name: Download Chrome reports
         uses: actions/download-artifact@v4
         with:
-          name: test-reports-all-browsers
-          path: reports/all-browsers
+          name: test-reports-chrome
+          path: reports/chrome
+
+      - name: Download Firefox reports
+        uses: actions/download-artifact@v4
+        with:
+          name: test-reports-firefox
+          path: reports/firefox
+
+      - name: Download Safari reports
+        uses: actions/download-artifact@v4
+        with:
+          name: test-reports-safari
+          path: reports/safari
 
       - name: Create index page for reports
         run: |
@@ -310,7 +381,9 @@ jobs:
     name: Test Summary
     needs:
       - lint-and-build
-      - wdio-all-browsers
+      - test-chrome
+      - test-firefox
+      - test-safari
       - mcp-server-validation
       - security-scan
       - postman-api-smoke
@@ -327,13 +400,15 @@ jobs:
           echo "| Job | Status | Notes |" >> $GITHUB_STEP_SUMMARY
           echo "|------------|--------|-------------|" >> $GITHUB_STEP_SUMMARY
           echo "| Lint & Build | ${{ needs.lint-and-build.result }} | TypeScript compile & bundle |" >> $GITHUB_STEP_SUMMARY
-          echo "| WebDriverIO (All Browsers) | ${{ needs.wdio-all-browsers.result }} | Chrome, Firefox, Safari |" >> $GITHUB_STEP_SUMMARY
+          echo "| Chrome Tests | ${{ needs.test-chrome.result }} | Chrome browser testing |" >> $GITHUB_STEP_SUMMARY
+          echo "| Firefox Tests | ${{ needs.test-firefox.result }} | Firefox browser testing |" >> $GITHUB_STEP_SUMMARY
+          echo "| Safari Tests | ${{ needs.test-safari.result }} | Safari browser testing |" >> $GITHUB_STEP_SUMMARY
           echo "| MCP Validation | ${{ needs.mcp-server-validation.result }} | MCP server startup and WebDriver functionality |" >> $GITHUB_STEP_SUMMARY
           echo "| Security Scan | ${{ needs.security-scan.result }} | Dependency vulnerability assessment |" >> $GITHUB_STEP_SUMMARY
           echo "| Postman API Smoke | ${{ needs.postman-api-smoke.result }} | Newsela public endpoints |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## 🎯 Branch: newsela" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ **Multi-Browser Integration**: Chrome, Firefox, Safari covered" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **Parallel Browser Testing**: Chrome, Firefox, Safari run simultaneously" >> $GITHUB_STEP_SUMMARY
           echo "- 🔧 **TypeScript**: Full type safety and modern build process" >> $GITHUB_STEP_SUMMARY
           echo "- 📊 **Centralized Reporting**: Aggregated per-browser artifacts" >> $GITHUB_STEP_SUMMARY
           echo "- 🚀 **15 MCP Tools**: Comprehensive web automation capabilities" >> $GITHUB_STEP_SUMMARY
