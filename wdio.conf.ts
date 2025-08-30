@@ -7,7 +7,20 @@ import type { Options } from '@wdio/types';
 // - Minimal hooks, only screenshot on failure
 
 // Allow selecting browsers via env var, e.g. BROWSERS=chrome,firefox,safari
-const requestedBrowsers = (process.env.BROWSERS || 'chrome')
+// Default to just chrome in CI, or chrome+firefox on non-macOS CI, or all browsers locally
+const getDefaultBrowsers = () => {
+  if (process.env.CI) {
+    // In CI, only use Safari on macOS runners
+    if (process.platform === 'darwin') {
+      return 'safari'; // Safari job runs only Safari
+    } else {
+      return 'chrome'; // Ubuntu runners use chrome or firefox individually
+    }
+  }
+  return 'chrome'; // Local development default
+};
+
+const requestedBrowsers = (process.env.BROWSERS || getDefaultBrowsers())
   .split(',')
   .map((b) => b.trim().toLowerCase())
   .filter(Boolean);
@@ -40,10 +53,36 @@ const capabilityCatalog: Record<string, BrowserCaps> = {
     ...(process.env.SAFARI_TP ? { 'safari.options': { technologyPreview: true } } : {}),
     acceptInsecureCerts: true,
     maxInstances: 1,
+    // Add Safari-specific timeouts and options
+    ...(process.env.CI ? {
+      'safari:options': {
+        cleanSession: true,
+      },
+      timeouts: {
+        implicit: 30000,
+        pageLoad: 60000,
+        script: 30000,
+      },
+    } : {}),
   },
 };
 
+// Filter out Safari on non-macOS platforms or when safaridriver is not available
+const isSafariAvailable = () => {
+  if (process.platform !== 'darwin') {
+    console.log('⚠️  Safari is only available on macOS. Skipping Safari tests.');
+    return false;
+  }
+  return true;
+};
+
 const resolvedCapabilities = requestedBrowsers
+  .filter((name) => {
+    if (name === 'safari' && !isSafariAvailable()) {
+      return false;
+    }
+    return true;
+  })
   .map((name) => capabilityCatalog[name])
   .filter(Boolean);
 
@@ -70,8 +109,8 @@ export const config: Options.Testrunner = {
   bail: 0,
   baseUrl: 'https://newsela.com',
   waitforTimeout: 10000,
-  connectionRetryTimeout: 120000,
-  connectionRetryCount: 3,
+  connectionRetryTimeout: process.env.CI ? 180000 : 120000, // Increased timeout for CI
+  connectionRetryCount: process.env.CI ? 5 : 3, // More retries in CI
 
   // Centralize all outputs to reports folder
   outputDir: './reports/wdio',

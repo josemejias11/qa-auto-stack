@@ -126,9 +126,13 @@ jobs:
       - name: Enable safaridriver
         run: sudo safaridriver --enable
 
+      - name: Validate Safari setup
+        run: npm run validate:safari
+
       - name: Run tests (safari)
         env:
           BROWSERS: safari
+          LOG_LEVEL: debug
         run: npm test
 
       - name: Generate Allure HTML
