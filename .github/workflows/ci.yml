@@ -52,7 +52,7 @@ jobs:
   wdio-all-browsers:
     name: WebDriverIO (All Browsers)
     needs: lint-and-build
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -79,43 +79,22 @@ jobs:
         with:
           firefox-version: 'latest'
 
-      - name: Run tests (All Browsers)
+      - name: Enable safaridriver
+        run: sudo safaridriver --enable
+
+      - name: Run tests (Chrome)
         env:
-          BROWSERS: chrome,firefox
+          BROWSERS: chrome
           HEADLESS: 1
           LOG_LEVEL: info
         run: npm test
 
-      - name: Upload test reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-reports-all-browsers
-          path: reports/
-          retention-days: 30
-
-  wdio-safari:
-    name: WebDriverIO (Safari)
-    needs: lint-and-build
-    runs-on: macos-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build project
-        run: npm run build
-
-      - name: Enable safaridriver
-        run: sudo safaridriver --enable
+      - name: Run tests (Firefox)
+        env:
+          BROWSERS: firefox
+          HEADLESS: 1
+          LOG_LEVEL: info
+        run: npm test
 
       - name: Run tests (Safari)
         env:
@@ -123,11 +102,11 @@ jobs:
           LOG_LEVEL: debug
         run: npm test
 
-      - name: Upload reports (Safari)
+      - name: Upload test reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-reports-safari
+          name: test-reports-all-browsers
           path: reports/
           retention-days: 30
 
@@ -259,7 +238,7 @@ jobs:
 
   generate-reports:
     name: Aggregate Test Reports
-    needs: [wdio-all-browsers, wdio-safari, mcp-server-validation]
+    needs: [wdio-all-browsers, mcp-server-validation]
     runs-on: ubuntu-latest
     if: always()
 
@@ -270,11 +249,6 @@ jobs:
           name: test-reports-all-browsers
           path: reports/all-browsers
 
-      - name: Download Safari reports
-        uses: actions/download-artifact@v4
-        with:
-          name: test-reports-safari
-          path: reports/safari
       - name: Create index page for reports
         run: |
           mkdir -p reports/
@@ -302,11 +276,11 @@ jobs:
               <div class="report-section success">
                   <h2>📊 Available Reports</h2>
                   <ul>
-                      <li>📄 <a href="all-browsers/json/">Chrome & Firefox JSON Results</a></li>
-                      <li>📄 <a href="safari/json/">Safari JSON Results</a></li>
-                      <li>📋 <a href="all-browsers/junit/">JUnit (Chrome & Firefox)</a> | <a href="safari/junit/">(Safari)</a></li>
-                      <li>📸 <a href="all-browsers/screenshots/">Screenshots (Chrome & Firefox)</a> | <a href="safari/screenshots/">(Safari)</a></li>
-                      <li>📝 <a href="all-browsers/wdio/">Logs (Chrome & Firefox)</a> | <a href="safari/wdio/">(Safari)</a></li>
+                      <li>📄 <a href="all-browsers/json/">All Browsers JSON Results</a></li>
+                      <li>� <a href="all-browsers/junit/">JUnit Reports</a></li>
+                      <li>� <a href="all-browsers/screenshots/">Screenshots</a></li>
+                      <li>� <a href="all-browsers/wdio/">WebDriverIO Logs</a></li>
+                      <li>� <a href="all-browsers/allure-results/">Allure Results</a></li>
                   </ul>
               </div>
 
@@ -337,7 +311,6 @@ jobs:
     needs:
       - lint-and-build
       - wdio-all-browsers
-      - wdio-safari
       - mcp-server-validation
       - security-scan
       - postman-api-smoke
@@ -354,8 +327,7 @@ jobs:
           echo "| Job | Status | Notes |" >> $GITHUB_STEP_SUMMARY
           echo "|------------|--------|-------------|" >> $GITHUB_STEP_SUMMARY
           echo "| Lint & Build | ${{ needs.lint-and-build.result }} | TypeScript compile & bundle |" >> $GITHUB_STEP_SUMMARY
-          echo "| WebDriverIO (Chrome/Firefox) | ${{ needs.wdio-all-browsers.result }} | Combined browser runs |" >> $GITHUB_STEP_SUMMARY
-          echo "| WebDriverIO (Safari) | ${{ needs.wdio-safari.result }} | Safari remote automation |" >> $GITHUB_STEP_SUMMARY
+          echo "| WebDriverIO (All Browsers) | ${{ needs.wdio-all-browsers.result }} | Chrome, Firefox, Safari |" >> $GITHUB_STEP_SUMMARY
           echo "| MCP Validation | ${{ needs.mcp-server-validation.result }} | MCP server startup and WebDriver functionality |" >> $GITHUB_STEP_SUMMARY
           echo "| Security Scan | ${{ needs.security-scan.result }} | Dependency vulnerability assessment |" >> $GITHUB_STEP_SUMMARY
           echo "| Postman API Smoke | ${{ needs.postman-api-smoke.result }} | Newsela public endpoints |" >> $GITHUB_STEP_SUMMARY
