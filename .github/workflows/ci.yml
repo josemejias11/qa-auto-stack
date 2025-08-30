@@ -49,14 +49,10 @@ jobs:
           path: dist/
           retention-days: 30
 
-  wdio-browser-matrix:
-    name: WebDriverIO (${{ matrix.browser }})
+  wdio-all-browsers:
+    name: WebDriverIO (All Browsers)
     needs: lint-and-build
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        browser: [chrome, firefox]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -70,41 +66,41 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build (reuse artifacts optional)
+      - name: Build project
         run: npm run build
 
       - name: Setup Chrome
-        if: matrix.browser == 'chrome'
         uses: browser-actions/setup-chrome@v1
         with:
           chrome-version: ${{ env.CHROME_VERSION }}
 
       - name: Setup Firefox
-        if: matrix.browser == 'firefox'
         uses: browser-actions/setup-firefox@v1
         with:
           firefox-version: 'latest'
 
-      - name: Run tests (${{ matrix.browser }})
+      - name: Run tests (All Browsers)
         env:
-          BROWSERS: ${{ matrix.browser }}
+          BROWSERS: chrome,firefox
           HEADLESS: 1
+          LOG_LEVEL: info
         run: npm test
 
       - name: Generate Allure HTML
+        if: always()
         run: |
           npx allure generate reports/allure-results --clean -o reports/allure-report || echo "Allure generation skipped"
 
-      - name: Upload reports (${{ matrix.browser }})
+      - name: Upload test reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-reports-${{ matrix.browser }}
+          name: test-reports-all-browsers
           path: reports/
           retention-days: 30
 
   wdio-safari:
-    name: WebDriverIO (safari)
+    name: WebDriverIO (Safari)
     needs: lint-and-build
     runs-on: macos-latest
     steps:
@@ -126,17 +122,18 @@ jobs:
       - name: Enable safaridriver
         run: sudo safaridriver --enable
 
-      - name: Run tests (safari)
+      - name: Run tests (Safari)
         env:
           BROWSERS: safari
           LOG_LEVEL: debug
         run: npm test
 
       - name: Generate Allure HTML
+        if: always()
         run: |
           npx allure generate reports/allure-results --clean -o reports/allure-report || echo "Allure generation skipped"
 
-      - name: Upload reports (safari)
+      - name: Upload reports (Safari)
         if: always()
         uses: actions/upload-artifact@v4
         with:
