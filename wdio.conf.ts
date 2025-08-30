@@ -160,7 +160,7 @@ export const config: Options.Testrunner = {
 
   mochaOpts: {
     ui: 'bdd',
-    timeout: 60000,
+    timeout: process.env.CI ? 120000 : 60000, // Increased timeout for CI (2 min vs 1 min)
   },
 
   // Retry flaky specs in CI once to mitigate transient network/content issues

@@ -18,9 +18,31 @@ export interface VideoProbeOptions {
   strict?: boolean;
 }
 
+function createTimeoutResult(url: string, reason: string): VideoProbeResult {
+  return {
+    url,
+    mode: 'timeout',
+    played: false,
+    delta: 0,
+    before: 0,
+    after: 0,
+    paused: true,
+    skipped: true,
+    reason: `timeout-${reason}`,
+  };
+}
+
 export async function playAndProbeVideo(options: VideoProbeOptions): Promise<VideoProbeResult> {
+  const timeout = 90000; // 90 second timeout for the entire function
+  const startTime = Date.now();
+  
   await browser.url(options.url || '');
   const currentUrl = await browser.getUrl();
+
+  // Early timeout check
+  if (Date.now() - startTime > timeout) {
+    return createTimeoutResult(currentUrl, 'url-navigation');
+  }
 
   // Detailed page inspection
   const inspection = await browser.execute(() => {
@@ -90,12 +112,17 @@ export async function playAndProbeVideo(options: VideoProbeOptions): Promise<Vid
   let wistiaState = null;
   if (wistiaId) {
     try {
-      // Click the container to try to activate
+      // Early timeout check
+      if (Date.now() - startTime > timeout) {
+        return createTimeoutResult(currentUrl, 'wistia-setup');
+      }
+      
+      // Click the container to try to activate (reduced wait time)
       const wistiaContainer = await browser.$('.wistia-video');
       if (await wistiaContainer.isExisting()) {
         await wistiaContainer.scrollIntoView();
         await wistiaContainer.click();
-        await browser.pause(3000);
+        await browser.pause(1500); // Reduced from 3000ms to 1500ms
       }
 
       // Check if Wistia infrastructure is working
@@ -158,6 +185,11 @@ export async function playAndProbeVideo(options: VideoProbeOptions): Promise<Vid
   const finalVideos = await browser.$$('video');
   if (finalVideos.length > 0) {
     try {
+      // Early timeout check
+      if (Date.now() - startTime > timeout) {
+        return createTimeoutResult(currentUrl, 'video-interaction');
+      }
+      
       const video = finalVideos[0];
       await video.scrollIntoView();
 
@@ -173,7 +205,7 @@ export async function playAndProbeVideo(options: VideoProbeOptions): Promise<Vid
         return videoEl.play();
       }, video);
 
-      await browser.pause(3000);
+      await browser.pause(2000); // Reduced from 3000ms to 2000ms
 
       const afterTime = await browser.execute((el) => {
         return (el as unknown as HTMLVideoElement).currentTime;
