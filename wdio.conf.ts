@@ -36,23 +36,44 @@ const capabilityCatalog: Record<string, BrowserCaps> = {
     browserName: 'chrome',
     acceptInsecureCerts: true,
     'goog:chromeOptions': {
-      args: ['--window-size=1440,900', ...(HEADLESS ? ['--headless=new'] : [])],
+      args: [
+        '--window-size=1440,900',
+        '--disable-web-security',
+        '--disable-features=VizDisplayCompositor',
+        '--enable-automation',
+        '--disable-background-timer-throttling',
+        '--disable-backgrounding-occluded-windows',
+        '--disable-renderer-backgrounding',
+        '--disable-dev-shm-usage',
+        '--no-sandbox',
+        '--enable-shared-array-buffer',
+        '--disk-cache-size=104857600', // 100MB cache
+        '--media-cache-size=104857600',
+        '--aggressive-cache-discard',
+        ...(HEADLESS ? ['--headless=new'] : [])
+      ],
     },
-    maxInstances: 1,
+    maxInstances: 2, // Allow parallel instances for better throughput
   },
   firefox: {
     browserName: 'firefox',
     acceptInsecureCerts: true,
-    'moz:firefoxOptions': HEADLESS
-      ? { args: ['-headless', '-width', '1440', '-height', '900'] }
-      : {},
-    maxInstances: 1,
+    'moz:firefoxOptions': {
+      ...(HEADLESS ? { args: ['-headless', '-width', '1440', '-height', '900'] } : {}),
+      prefs: {
+        'browser.cache.disk.enable': true,
+        'browser.cache.memory.enable': true,
+        'dom.webnotifications.enabled': false,
+        'dom.push.enabled': false,
+      },
+    },
+    maxInstances: 2, // Allow parallel instances
   },
   safari: {
     browserName: 'safari',
     ...(process.env.SAFARI_TP ? { 'safari.options': { technologyPreview: true } } : {}),
     acceptInsecureCerts: true,
-    maxInstances: 1,
+    maxInstances: 1, // Safari is more resource intensive, keep at 1
     // Add Safari-specific timeouts and options
     ...(process.env.CI
       ? {
@@ -102,7 +123,7 @@ export const config: Options.Testrunner = {
     },
   },
 
-  maxInstances: 1,
+  maxInstances: requestedBrowsers.length > 1 ? requestedBrowsers.length : 1, // Run browsers in parallel
   // Dynamically generated capability list based on BROWSERS env var
   capabilities: resolvedCapabilities.length ? resolvedCapabilities : [capabilityCatalog.chrome],
 

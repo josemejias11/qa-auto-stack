@@ -1,65 +1,178 @@
 # QA Automation Stack
 
-Simple TypeScript WebDriverIO + MCP server project for multi-browser UI, accessibility, links, forms, video, and smoke testing with Allure reporting.
+TypeScript WebDriverIO automation framework with parallel browser execution, Allure reporting, and comprehensive test coverage including API, UI, accessibility, forms, links, and video testing.
 
-## Tech
+## Features
 
-- TypeScript
-- WebdriverIO (Mocha)
-- Allure Reports (JSON + JUnit + Screenshots on failure)
-- MCP server (Model Context Protocol) endpoint
-- Axe-core (basic accessibility scan)
-- Chromedriver / Geckodriver services
-- Video playback testing (Wistia integration)
+- **Parallel Browser Testing**: Chrome, Firefox, Safari with cache optimization
+- **Comprehensive Test Coverage**: Smoke, accessibility, forms, links, video playback
+- **API Testing**: Newman/Postman integration with Allure reporting
+- **Allure Reports**: Rich HTML reports with automatic server startup
+- **MCP Server**: Model Context Protocol server for automation tools
+- **TypeScript**: Full type safety and modern development experience
+
+## Tech Stack
+
+- **WebDriverIO** with Mocha framework
+- **TypeScript** for type safety
+- **Allure Reports** with JSON, JUnit, and screenshot capture
+- **Axe-core** for accessibility testing
+- **Newman** for API testing
+- **Chromedriver/Geckodriver** services
+- **Video Testing** with Wistia integration
 
 ## Quick Start
 
-Install & build:
+Install dependencies and build:
 
 ```bash
 npm run setup
 ```
 
-Run all tests (all browsers):
+Run all tests (API + UI across all browsers):
 
 ```bash
 npm test
 ```
 
-Run smoke tests only:
+## Test Commands
+
+### Individual Test Suites
 
 ```bash
+# Smoke tests (quick validation)
 npm run test:smoke
-```
 
-Run video playback tests:
-
-```bash
-npm run test:video
-```
-
-Single browser test:
-
-```bash
-npm run test:chrome
-```
-
-Headless run:
-
-```bash
-HEADLESS=1 npm test
-```
-
-Accessibility testing:
-
-```bash
+# Accessibility tests
 npm run test:a11y
+
+# Contact form tests
+npm run test:forms
+
+# Link health checks
+npm run test:links
+
+# Video playback tests
+npm run test:video
+
+# API tests only
+npm run test:api
 ```
 
-Skip report auto-open (CI):
+### Browser-Specific Tests
 
 ```bash
+# Chrome only
+npm run test:chrome
+
+# Firefox only
+npm run test:firefox
+
+# Safari only
+npm run test:safari
+```
+
+## Configuration
+
+### Environment Variables
+
+```bash
+# Skip browser selection, use all browsers
+BROWSERS=chrome,firefox,safari npm test
+
+# Run in headless mode
+HEADLESS=1 npm test
+
+# Skip Allure report auto-opening
 SKIP_ALLURE_OPEN=1 npm test
+
+# Enable observation mode (keeps browser open)
+OBSERVE=1 npm test
+```
+
+## Reports
+
+Allure reports are automatically generated and served at `http://127.0.0.1:60551` after test runs.
+
+### Report Commands
+
+```bash
+# Generate report from existing results
+npm run allure:generate
+
+# Open existing report in browser
+npm run allure:open
+
+# Serve results with live reload
+npm run allure:serve
+```
+
+## Development
+
+### Code Quality
+
+```bash
+# Run linting
+npm run lint
+
+# Fix linting issues
+npm run lint:fix
+
+# Format code
+npm run format
+
+# Check formatting
+npm run format:check
+```
+
+### MCP Server
+
+```bash
+# Start MCP server
+npm start
+
+# Development mode with hot reload
+npm run dev
+
+# Run demo
+npm run demo
+```
+
+### Cleanup
+
+```bash
+# Clean all build artifacts and reports
+npm run clean
+
+# Clean only reports
+npm run clean:reports
+```
+
+## Project Structure
+
+```
+src/              # Source code
+tests/            # Test specifications
+  ├── smoke/      # Quick validation tests
+  ├── accessibility/ # A11y tests
+  ├── forms/      # Form interaction tests
+  ├── links/      # Link health tests
+  └── functional/ # Feature-specific tests
+postman/          # API test collections
+reports/          # Generated test reports
+scripts/          # Utility scripts
+examples/         # Usage examples
+```
+
+## Parallel Execution
+
+The framework supports parallel browser execution with shared cache optimization:
+
+- **Chrome**: 2 parallel instances with disk/media cache
+- **Firefox**: 2 parallel instances with cache preferences
+- **Safari**: 1 instance (Safari limitations)
+
+Tests run significantly faster with parallel execution while maintaining reliability.
 ```
 
 ## Video Testing
