@@ -86,11 +86,6 @@ jobs:
           LOG_LEVEL: info
         run: npm test
 
-      - name: Generate Allure HTML
-        if: always()
-        run: |
-          npx allure generate reports/allure-results --clean -o reports/allure-report || echo "Allure generation skipped"
-
       - name: Upload test reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -127,11 +122,6 @@ jobs:
           BROWSERS: safari
           LOG_LEVEL: debug
         run: npm test
-
-      - name: Generate Allure HTML
-        if: always()
-        run: |
-          npx allure generate reports/allure-results --clean -o reports/allure-report || echo "Allure generation skipped"
 
       - name: Upload reports (Safari)
         if: always()
@@ -269,22 +259,22 @@ jobs:
 
   generate-reports:
     name: Aggregate Test Reports
-    needs: [wdio-browser-matrix, wdio-safari, mcp-server-validation]
+    needs: [wdio-all-browsers, wdio-safari, mcp-server-validation]
     runs-on: ubuntu-latest
     if: always()
 
     steps:
-      - name: Download Chrome reports
+      - name: Download All Browsers reports
         uses: actions/download-artifact@v4
         with:
-          name: test-reports-chrome
-          path: reports/chrome
+          name: test-reports-all-browsers
+          path: reports/all-browsers
 
-      - name: Download Firefox reports
+      - name: Download Safari reports
         uses: actions/download-artifact@v4
         with:
-          name: test-reports-firefox
-          path: reports/firefox
+          name: test-reports-safari
+          path: reports/safari
       - name: Create index page for reports
         run: |
           mkdir -p reports/
@@ -312,12 +302,11 @@ jobs:
               <div class="report-section success">
                   <h2>📊 Available Reports</h2>
                   <ul>
-                      <li>📄 <a href="chrome/json/">Chrome JSON Results</a></li>
-                      <li>📄 <a href="firefox/json/">Firefox JSON Results</a></li>
+                      <li>📄 <a href="all-browsers/json/">Chrome & Firefox JSON Results</a></li>
                       <li>📄 <a href="safari/json/">Safari JSON Results</a></li>
-                      <li>📋 <a href="chrome/junit/">JUnit (Chrome)</a> | <a href="firefox/junit/">(Firefox)</a> | <a href="safari/junit/">(Safari)</a></li>
-                      <li>📸 <a href="chrome/screenshots/">Screenshots (Chrome)</a> | <a href="firefox/screenshots/">(Firefox)</a> | <a href="safari/screenshots/">(Safari)</a></li>
-                      <li>📝 <a href="chrome/wdio/">Logs (Chrome)</a> | <a href="firefox/wdio/">(Firefox)</a> | <a href="safari/wdio/">(Safari)</a></li>
+                      <li>📋 <a href="all-browsers/junit/">JUnit (Chrome & Firefox)</a> | <a href="safari/junit/">(Safari)</a></li>
+                      <li>📸 <a href="all-browsers/screenshots/">Screenshots (Chrome & Firefox)</a> | <a href="safari/screenshots/">(Safari)</a></li>
+                      <li>📝 <a href="all-browsers/wdio/">Logs (Chrome & Firefox)</a> | <a href="safari/wdio/">(Safari)</a></li>
                   </ul>
               </div>
 
@@ -347,7 +336,7 @@ jobs:
     name: Test Summary
     needs:
       - lint-and-build
-      - wdio-browser-matrix
+      - wdio-all-browsers
       - wdio-safari
       - mcp-server-validation
       - security-scan
@@ -365,7 +354,7 @@ jobs:
           echo "| Job | Status | Notes |" >> $GITHUB_STEP_SUMMARY
           echo "|------------|--------|-------------|" >> $GITHUB_STEP_SUMMARY
           echo "| Lint & Build | ${{ needs.lint-and-build.result }} | TypeScript compile & bundle |" >> $GITHUB_STEP_SUMMARY
-          echo "| WebDriverIO (Chrome/Firefox) | ${{ needs.wdio-browser-matrix.result }} | Matrix browser runs |" >> $GITHUB_STEP_SUMMARY
+          echo "| WebDriverIO (Chrome/Firefox) | ${{ needs.wdio-all-browsers.result }} | Combined browser runs |" >> $GITHUB_STEP_SUMMARY
           echo "| WebDriverIO (Safari) | ${{ needs.wdio-safari.result }} | Safari remote automation |" >> $GITHUB_STEP_SUMMARY
           echo "| MCP Validation | ${{ needs.mcp-server-validation.result }} | MCP server startup and WebDriver functionality |" >> $GITHUB_STEP_SUMMARY
           echo "| Security Scan | ${{ needs.security-scan.result }} | Dependency vulnerability assessment |" >> $GITHUB_STEP_SUMMARY
