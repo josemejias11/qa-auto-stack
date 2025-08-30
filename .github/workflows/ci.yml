@@ -169,6 +169,55 @@ jobs:
           path: reports/
           retention-days: 30
 
+  test-video:
+    name: Video Playback Validation
+    needs: lint-and-build
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: ${{ env.CHROME_VERSION }}
+
+      - name: Setup Firefox
+        uses: browser-actions/setup-firefox@v1
+        with:
+          firefox-version: 'latest'
+
+      - name: Enable safaridriver
+        run: sudo safaridriver --enable
+
+      - name: Run video playback tests
+        env:
+          BROWSERS: chrome,firefox,safari
+          HEADLESS: 1
+          LOG_LEVEL: info
+          SKIP_ALLURE_OPEN: 1
+        run: npm run test:video
+
+      - name: Upload video test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports-video
+          path: reports/
+          retention-days: 30
+
   mcp-server-validation:
     name: MCP Server Validation
     needs: lint-and-build
@@ -297,7 +346,7 @@ jobs:
 
   generate-reports:
     name: Aggregate Test Reports
-    needs: [test-chrome, test-firefox, test-safari, mcp-server-validation]
+    needs: [test-chrome, test-firefox, test-safari, test-video, mcp-server-validation]
     runs-on: ubuntu-latest
     if: always()
 
@@ -319,6 +368,12 @@ jobs:
         with:
           name: test-reports-safari
           path: reports/safari
+
+      - name: Download Video reports
+        uses: actions/download-artifact@v4
+        with:
+          name: test-reports-video
+          path: reports/video
 
       - name: Create index page for reports
         run: |
@@ -384,6 +439,7 @@ jobs:
       - test-chrome
       - test-firefox
       - test-safari
+      - test-video
       - mcp-server-validation
       - security-scan
       - postman-api-smoke
@@ -403,6 +459,7 @@ jobs:
           echo "| Chrome Tests | ${{ needs.test-chrome.result }} | Chrome browser testing |" >> $GITHUB_STEP_SUMMARY
           echo "| Firefox Tests | ${{ needs.test-firefox.result }} | Firefox browser testing |" >> $GITHUB_STEP_SUMMARY
           echo "| Safari Tests | ${{ needs.test-safari.result }} | Safari browser testing |" >> $GITHUB_STEP_SUMMARY
+          echo "| Video Tests | ${{ needs.test-video.result }} | Video playback validation across browsers |" >> $GITHUB_STEP_SUMMARY
           echo "| MCP Validation | ${{ needs.mcp-server-validation.result }} | MCP server startup and WebDriver functionality |" >> $GITHUB_STEP_SUMMARY
           echo "| Security Scan | ${{ needs.security-scan.result }} | Dependency vulnerability assessment |" >> $GITHUB_STEP_SUMMARY
           echo "| Postman API Smoke | ${{ needs.postman-api-smoke.result }} | Newsela public endpoints |" >> $GITHUB_STEP_SUMMARY
