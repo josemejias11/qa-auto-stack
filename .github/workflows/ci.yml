@@ -54,19 +54,19 @@ jobs:
       - run: npm run build
 
       - name: Setup Chrome
-        if: matrix.browser == 'chrome'
+        if: matrix.browser == 'Chrome'
         uses: browser-actions/setup-chrome@v1
         with:
           chrome-version: ${{ env.CHROME_VERSION }}
 
       - name: Setup Firefox
-        if: matrix.browser == 'firefox'
+        if: matrix.browser == 'Firefox'
         uses: browser-actions/setup-firefox@v1
         with:
           firefox-version: 'latest'
 
       - name: Enable Safari
-        if: matrix.browser == 'safari'
+        if: matrix.browser == 'Safari'
         run: sudo safaridriver --enable
 
       - name: Run tests
