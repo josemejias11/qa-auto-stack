@@ -104,8 +104,11 @@ jobs:
           chrome-version: ${{ env.CHROME_VERSION }}
       - uses: browser-actions/setup-firefox@v1
         with:
-          firefox-version: 'latest'
+          firefox-version: '122.0'
       - run: sudo safaridriver --enable
+      - name: Check Firefox Version
+        run: |
+          /Users/runner/hostedtoolcache/firefox/122.0/arm64/Contents/MacOS/firefox --version || echo "Firefox binary not found or failed to run"
       - name: Run video tests
         env:
           BROWSERS: chrome,firefox,safari
