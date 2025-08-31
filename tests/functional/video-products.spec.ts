@@ -20,6 +20,19 @@ describe('Functional: Product Videos Playback', () => {
       // Increase timeout for video tests to 120 seconds
       this.timeout(120000);
 
+      // Simulate user gesture for Firefox to bypass autoplay restrictions
+      // Get browser name in a way compatible with WDIO types
+      const browserName =
+        typeof browser.capabilities === 'object' && 'browserName' in browser.capabilities
+          ? String((browser.capabilities as any).browserName).toLowerCase()
+          : '';
+      if (browserName === 'firefox') {
+        await browser.execute(() => {
+          // Simulate a click on the body to trigger user gesture
+          document.body.click();
+        });
+      }
+
       const res = await playAndProbeVideo({ url, strict });
       console.log(
         `[DEBUG] ${url} - mode: ${res.mode}, played: ${res.played}, delta: ${res.delta}, before: ${res.before}, after: ${res.after}, reason: ${res.reason}`
