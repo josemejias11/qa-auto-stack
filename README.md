@@ -146,6 +146,9 @@ npm run clean
 
 # Clean only reports
 npm run clean:reports
+
+# Clean cache (npm and node_modules/.cache)
+npx tsx scripts/clean-cache.ts
 ```
 
 ## Video Testing
