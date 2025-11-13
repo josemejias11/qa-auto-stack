@@ -16,7 +16,8 @@
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
+    "types": ["@wdio/globals/types"]
   },
   "include": ["src/**/*.ts", "tests/**/*.ts", "examples/**/*.ts"],
   "exclude": ["node_modules", "dist"]

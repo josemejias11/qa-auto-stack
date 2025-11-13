@@ -15,7 +15,8 @@ export class HomePage {
   async navMenuItems(): Promise<string[]> {
     await browser.waitUntil(
       async () => {
-        const count = (await $$('header a[href], nav a[href]')).length;
+        const elements = await $$('header a[href], nav a[href]');
+        const count = await elements.length;
         return count > 0;
       },
       { timeout: 8000, timeoutMsg: 'Navigation links did not appear' }

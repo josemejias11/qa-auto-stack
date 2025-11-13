@@ -1,18 +1,12 @@
 import { remote } from 'webdriverio';
-import type { RemoteOptions, Browser } from 'webdriverio';
+import type { Browser } from 'webdriverio';
+import type { Capabilities } from '@wdio/types';
 import * as fs from 'fs';
 import * as path from 'path';
 
-interface ChromeCapabilities {
-  browserName: 'chrome';
-  'goog:chromeOptions': {
-    args: string[];
-  };
-}
-
 export class WebDriverManager {
   private driver: Browser | null = null;
-  private options: RemoteOptions & { capabilities: ChromeCapabilities };
+  private options: Capabilities.WebdriverIOConfig;
   private screenshotDir: string;
 
   constructor() {
@@ -33,7 +27,7 @@ export class WebDriverManager {
           ],
         },
       },
-    } as RemoteOptions & { capabilities: ChromeCapabilities };
+    };
   }
 
   async getDriver(): Promise<Browser> {
@@ -60,7 +54,7 @@ export class WebDriverManager {
   }
 
   async setHeadlessMode(headless: boolean): Promise<void> {
-    const chromeOptions = this.options.capabilities['goog:chromeOptions'];
+    const chromeOptions = (this.options.capabilities as any)['goog:chromeOptions'];
     if (headless) {
       if (!chromeOptions.args.includes('--headless')) {
         chromeOptions.args.push('--headless');
@@ -78,8 +72,10 @@ export class WebDriverManager {
   }
 
   async setWindowSize(width: number, height: number): Promise<void> {
-    const chromeOptions = this.options.capabilities['goog:chromeOptions'];
-    const sizeArgIndex = chromeOptions.args.findIndex((arg) => arg.startsWith('--window-size='));
+    const chromeOptions = (this.options.capabilities as any)['goog:chromeOptions'];
+    const sizeArgIndex = chromeOptions.args.findIndex((arg: string) =>
+      arg.startsWith('--window-size=')
+    );
     const newSizeArg = `--window-size=${width},${height}`;
 
     if (sizeArgIndex > -1) {
