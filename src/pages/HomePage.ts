@@ -26,7 +26,7 @@ export class HomePage {
       try {
         const t = (await el.getText()).trim();
         if (t && t.length < 60) texts.push(t);
-      } catch (err) {
+      } catch (_err) {
         // swallow individual element text retrieval failures (e.g., stale element) intentionally
       }
     }

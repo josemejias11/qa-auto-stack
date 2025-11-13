@@ -44,7 +44,6 @@ describe('Functional: Product Videos Playback', () => {
       }
 
       if (res.skipped) {
-        // eslint-disable-next-line no-console
         console.warn(`[video-skip] ${url} reason=${res.reason}`);
         return this.skip();
       }
@@ -54,7 +53,6 @@ describe('Functional: Product Videos Playback', () => {
         browserName === 'firefox' &&
         (res.mode === 'embedded' || res.raw?.inspection?.iframeCount > 0)
       ) {
-        // eslint-disable-next-line no-console
         console.warn(`[firefox-embedded-skip] Skipping embedded/iframe video playback for ${url}`);
         return this.skip();
       }

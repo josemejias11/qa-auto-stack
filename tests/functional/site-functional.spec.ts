@@ -202,7 +202,7 @@ describe('Newsela marketing site functional flow', () => {
         (l) => l && typeof l.level === 'string' && /severe/i.test(l.level)
       );
       expect(severe.length).toBeLessThan(10);
-    } catch (_) {
+    } catch (_e) {
       // log collection not supported; skip
     }
   });

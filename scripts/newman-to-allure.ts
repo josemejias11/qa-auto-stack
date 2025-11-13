@@ -45,7 +45,7 @@ async function main() {
                 await fs.unlink(p);
                 removed++;
               }
-            } catch (e) {
+            } catch (_e) {
               /* ignore per-file errors */
             }
           })

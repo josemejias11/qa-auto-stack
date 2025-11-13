@@ -1,5 +1,5 @@
 /* Reusable Wistia / native video playback probe helper */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 export interface VideoProbeResult {
   url: string;
   mode: string;

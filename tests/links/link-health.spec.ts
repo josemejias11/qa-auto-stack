@@ -31,7 +31,7 @@ describe('Link Health: homepage internal anchors', () => {
             ok: res.status < 400,
             redirected: res.redirected,
           });
-        } catch (e) {
+        } catch (_e) {
           out.push({ path: p, status: 0, ok: false, redirected: false });
         }
       }
