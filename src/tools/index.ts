@@ -1,7 +1,46 @@
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 
+/**
+ * Helper function to create a tool with selector-only input
+ */
+function createSelectorTool(
+  name: string,
+  description: string,
+  selectorDesc: string = 'CSS selector for the element'
+): Tool {
+  return {
+    name,
+    description,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        selector: {
+          type: 'string',
+          description: selectorDesc,
+        },
+      },
+      required: ['selector'],
+    },
+  };
+}
+
+/**
+ * Helper function to create a tool with no input parameters
+ */
+function createNoInputTool(name: string, description: string): Tool {
+  return {
+    name,
+    description,
+    inputSchema: {
+      type: 'object',
+      properties: {},
+    },
+  };
+}
+
 export function registerWebAutomationTools(): Tool[] {
   return [
+    // Navigation
     {
       name: 'navigate',
       description: 'Navigate to a specific URL in the browser',
@@ -16,20 +55,12 @@ export function registerWebAutomationTools(): Tool[] {
         required: ['url'],
       },
     },
-    {
-      name: 'click',
-      description: 'Click on an element specified by a CSS selector',
-      inputSchema: {
-        type: 'object',
-        properties: {
-          selector: {
-            type: 'string',
-            description: 'CSS selector for the element to click',
-          },
-        },
-        required: ['selector'],
-      },
-    },
+    createNoInputTool('go_back', 'Navigate back to the previous page'),
+    createNoInputTool('go_forward', 'Navigate forward to the next page'),
+    createNoInputTool('refresh_page', 'Refresh the current page'),
+
+    // Interaction
+    createSelectorTool('click', 'Click on an element specified by a CSS selector'),
     {
       name: 'type',
       description: 'Type text into an input field specified by a CSS selector',
@@ -48,46 +79,19 @@ export function registerWebAutomationTools(): Tool[] {
         required: ['selector', 'text'],
       },
     },
-    {
-      name: 'screenshot',
-      description: 'Take a screenshot of the current page',
-      inputSchema: {
-        type: 'object',
-        properties: {},
-      },
-    },
-    {
-      name: 'get_text',
-      description: 'Get the text content of an element specified by a CSS selector',
-      inputSchema: {
-        type: 'object',
-        properties: {
-          selector: {
-            type: 'string',
-            description: 'CSS selector for the element to get text from',
-          },
-        },
-        required: ['selector'],
-      },
-    },
-    {
-      name: 'wait_for_element',
-      description: 'Wait for an element to become visible on the page',
-      inputSchema: {
-        type: 'object',
-        properties: {
-          selector: {
-            type: 'string',
-            description: 'CSS selector for the element to wait for',
-          },
-          timeout: {
-            type: 'number',
-            description: 'Maximum time to wait in milliseconds (default: 30000)',
-          },
-        },
-        required: ['selector'],
-      },
-    },
+    createSelectorTool('hover', 'Hover over an element specified by a CSS selector'),
+
+    // Inspection
+    createSelectorTool(
+      'get_text',
+      'Get the text content of an element specified by a CSS selector',
+      'CSS selector for the element to get text from'
+    ),
+    createNoInputTool('get_page_title', 'Get the title of the current page'),
+    createNoInputTool('get_current_url', 'Get the current URL of the page'),
+    createNoInputTool('screenshot', 'Take a screenshot of the current page'),
+
+    // Forms
     {
       name: 'fill_form',
       description: 'Fill multiple form fields at once',
@@ -134,20 +138,28 @@ export function registerWebAutomationTools(): Tool[] {
         required: ['selector', 'value'],
       },
     },
+
+    // Wait
     {
-      name: 'hover',
-      description: 'Hover over an element specified by a CSS selector',
+      name: 'wait_for_element',
+      description: 'Wait for an element to become visible on the page',
       inputSchema: {
         type: 'object',
         properties: {
           selector: {
             type: 'string',
-            description: 'CSS selector for the element to hover over',
+            description: 'CSS selector for the element to wait for',
+          },
+          timeout: {
+            type: 'number',
+            description: 'Maximum time to wait in milliseconds (default: 30000)',
           },
         },
         required: ['selector'],
       },
     },
+
+    // Scroll
     {
       name: 'scroll_to',
       description: 'Scroll to an element or specific coordinates',
@@ -168,46 +180,6 @@ export function registerWebAutomationTools(): Tool[] {
             description: 'Y coordinate to scroll to',
           },
         },
-      },
-    },
-    {
-      name: 'get_page_title',
-      description: 'Get the title of the current page',
-      inputSchema: {
-        type: 'object',
-        properties: {},
-      },
-    },
-    {
-      name: 'get_current_url',
-      description: 'Get the current URL of the page',
-      inputSchema: {
-        type: 'object',
-        properties: {},
-      },
-    },
-    {
-      name: 'refresh_page',
-      description: 'Refresh the current page',
-      inputSchema: {
-        type: 'object',
-        properties: {},
-      },
-    },
-    {
-      name: 'go_back',
-      description: 'Navigate back to the previous page',
-      inputSchema: {
-        type: 'object',
-        properties: {},
-      },
-    },
-    {
-      name: 'go_forward',
-      description: 'Navigate forward to the next page',
-      inputSchema: {
-        type: 'object',
-        properties: {},
       },
     },
   ];
