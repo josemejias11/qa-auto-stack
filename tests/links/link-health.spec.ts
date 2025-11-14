@@ -1,11 +1,12 @@
 import { expect } from 'expect';
+import { BASE_URL } from '../../src/constants/index.js';
 /// <reference types="@wdio/globals" />
 
 // Client-side link sampling to detect obvious broken internal anchors on home page
 
 describe('Link Health: homepage internal anchors', () => {
   it('samples internal links and reports HTTP error statuses', async () => {
-    await browser.url('https://newsela.com');
+    await browser.url(BASE_URL);
     const links: string[] = await browser.execute(() => {
       const anchors = Array.from(document.querySelectorAll('a[href^="/"]')) as HTMLAnchorElement[];
       const paths = anchors

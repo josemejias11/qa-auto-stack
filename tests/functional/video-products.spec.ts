@@ -1,15 +1,16 @@
 import { expect } from 'expect';
 import { playAndProbeVideo } from '../helpers/videoProbe.js';
+import { getProductUrl, TIMEOUTS } from '../../src/constants/index.js';
 
 // Dedicated per-product video playback tests using reusable probe helper.
 // Skips (non-strict) when playback can't be confirmed instead of failing the build.
 
 const productVideoPages = [
-  'https://newsela.com/products/ela',
-  'https://newsela.com/products/social-studies',
-  'https://newsela.com/products/science',
-  'https://newsela.com/products/writing',
-  'https://newsela.com/products/formative',
+  getProductUrl('ELA'),
+  getProductUrl('SOCIAL_STUDIES'),
+  getProductUrl('SCIENCE'),
+  getProductUrl('WRITING'),
+  getProductUrl('FORMATIVE'),
 ];
 
 describe('Functional: Product Videos Playback', () => {
@@ -17,8 +18,8 @@ describe('Functional: Product Videos Playback', () => {
 
   for (const url of productVideoPages) {
     it(`verifies video playback probe for ${url}`, async function () {
-      // Increase timeout for video tests to 120 seconds
-      this.timeout(120000);
+      // Increase timeout for video tests
+      this.timeout(TIMEOUTS.VIDEO);
 
       // Simulate user gesture for Firefox to bypass autoplay restrictions
       // Get browser name in a way compatible with WDIO types

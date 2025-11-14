@@ -1,13 +1,10 @@
 import { expect } from 'expect';
 import axeSource from 'axe-core';
+import { BASE_URL, getProductUrl } from '../../src/constants/index.js';
 /// <reference types="@wdio/globals" />
 
 // Basic a11y scan on a small set of key pages using axe-core runtime injected in browser context
-const pages = [
-  'https://newsela.com/',
-  'https://newsela.com/products/ela',
-  'https://newsela.com/products/science',
-];
+const pages = [BASE_URL, getProductUrl('ELA'), getProductUrl('SCIENCE')];
 
 // Allow a tiny number of critical issues (e.g. 1) to avoid blocking the pipeline on a single upstream widget issue.
 // Set to 0 again once the baseline is clean.

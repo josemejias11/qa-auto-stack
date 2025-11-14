@@ -1,4 +1,5 @@
 import { expect } from 'expect';
+import { BASE_URL, SELECTORS, TIMEOUTS } from '../../src/constants/index.js';
 
 /**
  * Functional traversal of key marketing site areas:
@@ -18,7 +19,7 @@ describe('Newsela marketing site functional flow', () => {
 
   async function safeClick(selector: string) {
     const el = await $(selector);
-    await el.waitForExist({ timeout: 10000 });
+    await el.waitForExist({ timeout: TIMEOUTS.DEFAULT });
     try {
       await el.scrollIntoView({ block: 'center', inline: 'center' });
       await browser.pause(100);
@@ -38,7 +39,7 @@ describe('Newsela marketing site functional flow', () => {
   async function safeSetValue(el: WebdriverIO.Element, value: string, attempts = 3) {
     for (let i = 0; i < attempts; i++) {
       try {
-        await el.waitForExist({ timeout: 5000 });
+        await el.waitForExist({ timeout: TIMEOUTS.SHORT });
         if (!(await el.isDisplayed())) {
           await el.scrollIntoView({ block: 'center', inline: 'center' });
           await browser.pause(100);
@@ -76,9 +77,9 @@ describe('Newsela marketing site functional flow', () => {
 
   it('navigates core pages and validates elements', async () => {
     // 1. Landing page
-    await browser.url('https://newsela.com');
+    await browser.url(BASE_URL);
     await record(await browser.getUrl());
-    const hero = await $('h1');
+    const hero = await $(SELECTORS.COMMON.H1);
     expect(await hero.isExisting()).toBe(true);
     const heroText = (await hero.getText()).trim();
     expect(heroText.length).toBeGreaterThan(3);
@@ -86,12 +87,10 @@ describe('Newsela marketing site functional flow', () => {
     // Collect a sample of nav links (top-level) and ensure uniqueness with retries (dynamic rendering protection)
     let navTexts: string[] = [];
     for (let attempt = 0; attempt < 10; attempt++) {
-      navTexts = await browser.execute(() => {
-        const nodes = Array.from(
-          document.querySelectorAll('header a[href]')
-        ) as HTMLAnchorElement[];
+      navTexts = await browser.execute((selector: string) => {
+        const nodes = Array.from(document.querySelectorAll(selector)) as HTMLAnchorElement[];
         return Array.from(new Set(nodes.map((n) => (n.innerText || '').trim()).filter(Boolean)));
-      });
+      }, SELECTORS.HEADER.NAV_LINKS);
       if (navTexts.length > 5) break;
       await browser.pause(400);
     }
@@ -108,7 +107,7 @@ describe('Newsela marketing site functional flow', () => {
       if (clicked) {
         await browser.pause(500);
         await record(await browser.getUrl());
-        const h1 = await $('h1');
+        const h1 = await $(SELECTORS.COMMON.H1);
         expect(await h1.isExisting()).toBe(true);
       }
     }
@@ -164,7 +163,7 @@ describe('Newsela marketing site functional flow', () => {
         console.warn(`Skipping auth-oriented path: ${path}`);
         continue;
       }
-      const full = `https://newsela.com${path}`;
+      const full = `${BASE_URL}${path}`;
       try {
         await browser.url(full);
         await browser.pause(250);

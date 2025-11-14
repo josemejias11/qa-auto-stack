@@ -16,7 +16,7 @@ export const PRODUCTS = {
   SCIENCE: '/products/science',
   SEL: '/products/sel',
   WRITING: '/products/writing',
-  FORMATIVE: '/products/formative-assessments',
+  FORMATIVE: '/products/formative',
 } as const;
 
 /**

@@ -1,11 +1,12 @@
 import { expect } from 'expect';
+import { getUrl } from '../../src/constants/index.js';
 /// <reference types="@wdio/globals" />
 
 // Non-submitting validation of presence of contact/demo form fields
 
 describe('Forms: contact/demo presence', () => {
   it('detects a lead/contact form and required fields', async () => {
-    await browser.url('https://newsela.com/contact-us');
+    await browser.url(getUrl('/contact-us'));
     // Look for common required fields (first name, last name, email)
     const selectors = ['input[name*="first" i]', 'input[name*="last" i]', 'input[type="email"]'];
     let found = 0;
