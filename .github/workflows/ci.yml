@@ -2,9 +2,9 @@ name: CI - WebDriverIO MCP Server
 
 on:
   push:
-    branches: [newsela]
+    branches: [main]
   pull_request:
-    branches: [newsela]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
