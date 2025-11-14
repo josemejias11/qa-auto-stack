@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This project supports **THREE automation frameworks** with a unified interface:
 - **Selenium WebDriver** - Industry standard, direct WebDriver API
-- **WebDriverIO** - Modern wrapper with enhanced features (currently primary)
+- **WebDriverIO** - Modern wrapper with enhanced features
 - **Cypress** - Fast, in-browser testing framework
 
 **See [FRAMEWORK.md](FRAMEWORK.md) for detailed architecture documentation.**
@@ -36,33 +36,35 @@ npm run build              # Compile TypeScript to dist/
 
 ### Testing
 ```bash
-npm test                   # Run API tests + all UI tests across all browsers + generate Allure report
-npm run test:api           # Run Newman API tests only
-npm run test:smoke         # Quick smoke test (home page validation)
-npm run test:a11y          # Accessibility tests with axe-core
-npm run test:forms         # Contact form validation tests
-npm run test:links         # Link health checks
-npm run test:video         # Video playback tests across browsers
+npm test                   # Run tests with WebDriverIO (default)
+npm run test:all           # Run tests on ALL frameworks sequentially
+npm run test:selenium      # Run tests with Selenium WebDriver
+npm run test:webdriverio   # Run tests with WebDriverIO
+npm run test:cypress       # Run tests with Cypress
 
 # Browser-specific
-npm run test:chrome        # API + all UI tests in Chrome only
-npm run test:firefox       # API + all UI tests in Firefox only
-npm run test:safari        # API + all UI tests in Safari only (macOS only)
+npm run test:chrome        # Run tests in Chrome
+npm run test:firefox       # Run tests in Firefox
+npm run test:safari        # Run tests in Safari (macOS only)
+
+# Headless mode
+npm run test:headless      # Run tests in headless mode
 ```
 
 ### Running Single Tests
 ```bash
-npx wdio run ./wdio.conf.ts --spec ./tests/smoke/home.smoke.spec.ts
-BROWSERS=chrome npx wdio run ./wdio.conf.ts --spec ./tests/forms/contact-form.spec.ts
+FRAMEWORK=selenium tsx tests/runner.ts
+FRAMEWORK=webdriverio BROWSER=chrome tsx tests/runner.ts
+FRAMEWORK=cypress HEADLESS=1 tsx tests/runner.ts
 ```
 
 ### Environment Variables
 ```bash
-BROWSERS=chrome,firefox,safari npm test    # Select specific browsers
-HEADLESS=1 npm test                        # Run in headless mode
-OBSERVE=1 npm test                         # Keep browser open for debugging
-SKIP_ALLURE_OPEN=1 npm test                # Skip auto-opening Allure report
-LOG_LEVEL=debug npm test                   # Verbose logging for debugging
+FRAMEWORK=selenium|webdriverio|cypress  # Select framework
+BROWSER=chrome|firefox|safari           # Select browser
+HEADLESS=1                              # Run in headless mode
+TIMEOUT=15000                           # Custom timeout in ms
+SPEC=tests/**/*.spec.ts                 # Test file pattern
 ```
 
 ### Code Quality
@@ -80,25 +82,17 @@ npm start                  # Run compiled MCP server (requires npm run build)
 npm run dev                # Development mode with hot reload
 ```
 
-### Reports
-```bash
-npm run allure:generate    # Generate static report from allure-results
-npm run allure:open        # Open existing report in browser
-npm run allure:serve       # Serve results with live reload
-```
-
 ### Cleanup
 ```bash
 npm run clean              # Remove dist/, reports/, test-results/
 npm run clean:reports      # Clear report folders but keep .gitkeep files
-npx tsx scripts/clean-cache.ts  # Clean npm and node_modules/.cache
 ```
 
 ## Architecture
 
 ### Project Structure
 - **src/**: Shared code and MCP server implementation
-  - **framework/**: Multi-framework adapter system (NEW!)
+  - **framework/**: Multi-framework adapter system
     - **types.ts**: Common interfaces for all frameworks
     - **base-adapter.ts**: Abstract base class
     - **factory.ts**: Creates appropriate adapter based on config
@@ -109,21 +103,11 @@ npx tsx scripts/clean-cache.ts  # Clean npm and node_modules/.cache
   - **handlers/**: WebDriver tool handlers (navigation, interaction, inspection, forms, wait, scroll)
   - **tools/**: MCP tool definitions and schemas
   - **webdriver/**: WebDriver manager for browser session management
-  - **constants/**: Centralized selectors, timeouts, and URLs
 - **tests/**: Test suites (framework-agnostic)
   - **examples/**: Multi-framework example tests
-  - **smoke/**: Quick validation tests
-  - **accessibility/**: Axe-core accessibility tests
-  - **forms/**: Form interaction and validation tests
-  - **links/**: Link health checks
-  - **functional/**: Feature tests including video playback
-  - **helpers/**: Test utility functions
   - **runner.ts**: Multi-framework test runner
 - **scripts/**: Build and automation utilities
-  - **newman-to-allure.ts**: Converts Newman JSON results to Allure format
   - **clean-reports.ts**: Report cleanup utility
-  - **open-allure.ts**: Opens Allure report in browser
-- **postman/**: API test collections and environments
 - **reports/**: Test artifacts (gitignored except .gitkeep files)
 
 ### Handler Registry Pattern
@@ -138,38 +122,19 @@ To add a new tool:
 2. Register in `handlerRegistry` Map in `src/handlers/index.ts`
 3. Add tool definition in `src/tools/index.ts`
 
-### WebDriverIO Configuration
-- **Multi-browser support**: Chrome, Firefox, Safari via `BROWSERS` env var
-- **Parallel execution**: Multiple browser instances run concurrently (Chrome/Firefox: 2, Safari: 1)
-- **Window size**: Fixed 1440x900 for consistency
-- **Headless mode**: Enabled with `HEADLESS=1` (Chrome: `--headless=new`, Firefox: `-headless`)
+### Framework Configuration
+- **Multi-framework support**: Selenium, WebDriverIO, Cypress via `FRAMEWORK` env var
+- **Multi-browser support**: Chrome, Firefox, Safari via `BROWSER` env var
+- **Window size**: Fixed 1440x900 for consistency (configurable)
+- **Headless mode**: Enabled with `HEADLESS=1`
 - **Cache optimization**: Disk and memory cache enabled for faster test execution
-- **CI mode**: Auto-detected via `process.env.CI` with extended timeouts and retries
 - **Safari support**: macOS only, requires `safaridriver --enable` (one-time setup)
-
-### API Testing Integration
-- Newman runs Postman collections before UI tests
-- Results converted to Allure format via `scripts/newman-to-allure.ts`
-- API tests appear in unified Allure report under "Postman" suite
-- Collections stored in `postman/collections/`, environments in `postman/environments/`
 
 ### TypeScript Configuration
 - **ES Modules**: Uses `"type": "module"` with `.js` imports in TypeScript files
 - **Two configs**:
   - `tsconfig.json`: Main config with `noEmit: true` for IDE and type checking
   - `tsconfig.build.json`: Build config that actually emits to `dist/`
-- **WebDriverIO globals**: Available via `@wdio/globals/types`
-
-### Reporting System
-All test artifacts centralized in `reports/`:
-- **allure-results/**: Raw Allure test results
-- **allure-report/**: Generated HTML report (served at http://127.0.0.1:60551)
-- **json/**: Daily aggregated JSON files
-- **junit/**: Daily XML reports
-- **screenshots/**: Failure screenshots with timestamp + test title
-- **wdio/**: WebDriverIO runner logs
-- **chromedriver/**, **geckodriver/**: Driver logs
-- **api/**: Newman JSON results
 
 ### MCP Server Tools
 The MCP server exposes these WebDriver automation tools:
@@ -180,41 +145,43 @@ The MCP server exposes these WebDriver automation tools:
 - **Wait**: wait_for_element
 - **Scroll**: scroll_to
 
-### Constants Organization
-Centralized constants in `src/constants/`:
-- **selectors.ts**: CSS selectors for common elements
-- **timeouts.ts**: Timeout values for waits and retries
-- **urls.ts**: Base URLs and route definitions
-
-Import pattern: `import { SELECTORS, TIMEOUTS, BASE_URL } from '../constants/index.js';`
-
 ## Development Notes
 
 ### Test Execution Flow
-1. API tests run first via Newman
-2. Newman results converted to Allure format
-3. UI tests run across selected browsers in parallel
-4. Allure report auto-generated and opened (unless `SKIP_ALLURE_OPEN=1`)
+1. Initialize framework adapter based on FRAMEWORK env var
+2. Run tests using Mocha test runner
+3. Tests use unified IBrowserAdapter interface
+4. Framework-specific implementation handles browser automation
+5. Clean up browser session after tests complete
 
 ### Browser Selection Logic
 - **Local**: Defaults to Chrome
-- **CI**:
-  - Safari on macOS runners
-  - Chrome or Firefox on Ubuntu runners (job-specific)
-- Override with `BROWSERS=chrome,firefox,safari`
+- Override with `BROWSER=chrome|firefox|safari`
+- Framework support varies:
+  - Selenium: All browsers
+  - WebDriverIO: All browsers
+  - Cypress: Chrome, Firefox, Edge (no Safari)
 
-### Failure Handling
-- Screenshots saved to `reports/screenshots/` on test failure
-- Allure captures screenshots in report
-- Spec file retries in CI: 1 retry with 2s delay
-- Connection retry: 3 attempts locally, 5 in CI
+### Framework-Specific Notes
 
-### Video Testing
-Comprehensive Wistia video testing across product pages:
-- Detects Wistia player infrastructure
-- Validates playback capability
-- Tests: ELA, Social Studies, Science, Writing, Formative pages
-- Run with `npm run test:video` (all browsers by default)
+#### Selenium WebDriver
+- Direct WebDriver API access
+- Broadest browser support
+- Most mature and stable
+- Best for cross-browser testing
+
+#### WebDriverIO
+- Modern API wrapper around Selenium
+- Better developer experience
+- Built-in retry and wait mechanisms
+- Excellent documentation
+
+#### Cypress
+- Runs IN the browser (different architecture)
+- Very fast test execution
+- Excellent debugging capabilities
+- Limited to Chrome, Firefox, Edge
+- **Note:** XPath not natively supported (use CSS selectors)
 
 ### Module System
 - ES Modules throughout

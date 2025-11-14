@@ -11,6 +11,7 @@ import { FrameworkType } from '../../src/framework/types.js';
 
 describe('Multi-Framework Smoke Test', () => {
   let browser: any;
+  const TEST_URL = 'https://example.com';
 
   before(async function () {
     this.timeout(30000); // Allow time for browser initialization
@@ -22,7 +23,7 @@ describe('Multi-Framework Smoke Test', () => {
       framework: frameworkType,
       browser: process.env.BROWSER || 'chrome',
       headless: process.env.HEADLESS === '1',
-      baseUrl: 'https://newsela.com',
+      baseUrl: TEST_URL,
       timeout: 10000,
     });
 
@@ -34,43 +35,43 @@ describe('Multi-Framework Smoke Test', () => {
     await TestHelper.close();
   });
 
-  it('should navigate to Newsela homepage', async function () {
+  it('should navigate to example.com', async function () {
     this.timeout(15000);
 
-    const result = await browser.navigate('https://newsela.com');
+    const result = await browser.navigate(TEST_URL);
     expect(result.success).to.be.true;
 
     const url = await browser.getCurrentUrl();
-    expect(url).to.include('newsela.com');
+    expect(url).to.include('example.com');
   });
 
   it('should display the correct page title', async function () {
     this.timeout(10000);
 
     const title = await browser.getTitle();
-    expect(title).to.include('Newsela');
+    expect(title).to.include('Example');
   });
 
-  it('should find and verify main navigation', async function () {
+  it('should find and verify page content', async function () {
     this.timeout(15000);
 
-    // Wait for navigation to be visible
-    await browser.waitForElement('nav', { visible: true, timeout: 10000 });
+    // Wait for h1 element
+    await browser.waitForElement('h1', { visible: true, timeout: 10000 });
 
-    const navExists = await browser.exists('nav');
-    expect(navExists).to.be.true;
+    const h1Exists = await browser.exists('h1');
+    expect(h1Exists).to.be.true;
 
-    const navVisible = await browser.isVisible('nav');
-    expect(navVisible).to.be.true;
+    const h1Visible = await browser.isVisible('h1');
+    expect(h1Visible).to.be.true;
   });
 
   it('should interact with page elements', async function () {
     this.timeout(15000);
 
-    // Check if logo exists
-    const logoSelector = 'a[href="/"]';
-    const logoExists = await browser.exists(logoSelector);
-    expect(logoExists).to.be.true;
+    // Get h1 text
+    const h1Text = await browser.getText('h1');
+    expect(h1Text).to.be.a('string');
+    expect(h1Text.length).to.be.greaterThan(0);
 
     // Scroll to bottom and back to top
     await browser.scrollToBottom();
