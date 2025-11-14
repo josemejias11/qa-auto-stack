@@ -1,19 +1,47 @@
 # QA Automation Stack
 
-TypeScript WebDriverIO automation framework with parallel browser execution, Allure reporting, and comprehensive test coverage including API, UI, accessibility, forms, links, and video testing.
+🚀 **Multi-Framework Test Automation** with TypeScript, supporting Selenium, WebDriverIO, and Cypress through a unified interface.
 
-## Features
+## 🎯 Key Feature: Multi-Framework Architecture
 
-- **Parallel Browser Testing**: Chrome, Firefox, Safari with cache optimization
-- **Comprehensive Test Coverage**: Smoke, accessibility, forms, links, video playback
-- **API Testing**: Newman/Postman integration with Allure reporting
-- **Allure Reports**: Rich HTML reports with automatic server startup
-- **MCP Server**: Model Context Protocol server for automation tools
-- **TypeScript**: Full type safety and modern development experience
+**Write tests once, run on ANY framework:**
 
-## Tech Stack
+```typescript
+// Same test runs on Selenium, WebDriverIO, OR Cypress!
+const browser = await TestHelper.init({ framework: FrameworkType.SELENIUM });
+await browser.navigate('https://example.com');
+await browser.click('.submit-button');
+const title = await browser.getTitle();
+```
 
-- **WebDriverIO** with Mocha framework
+Switch frameworks with a single environment variable:
+```bash
+FRAMEWORK=selenium npm run test:selenium
+FRAMEWORK=webdriverio npm test
+FRAMEWORK=cypress npm run test:cypress
+```
+
+**📚 See [FRAMEWORK.md](FRAMEWORK.md) for complete architecture documentation.**
+
+## ✨ Features
+
+- **🔄 Multi-Framework Support**: Selenium WebDriver, WebDriverIO, Cypress with unified API
+- **⚡ Parallel Browser Testing**: Chrome, Firefox, Safari with cache optimization
+- **📊 Comprehensive Test Coverage**: Smoke, accessibility, forms, links, video playback
+- **🔌 API Testing**: Newman/Postman integration with Allure reporting
+- **📈 Allure Reports**: Rich HTML reports with automatic server startup
+- **🤖 MCP Server**: Model Context Protocol server for automation tools
+- **💪 TypeScript**: Full type safety and modern development experience
+- **🎨 Framework Adapter Pattern**: Easy to extend with new frameworks
+
+## 🛠️ Tech Stack
+
+### Supported Frameworks
+- **Selenium WebDriver** (v4.27+) - Industry standard
+- **WebDriverIO** (v9.20+) - Modern wrapper (default)
+- **Cypress** (v13.18+) - Fast, in-browser testing
+
+### Additional Tools
 - **TypeScript** for type safety
 - **Allure Reports** with JSON, JUnit, and screenshot capture
 - **Axe-core** for accessibility testing
@@ -36,6 +64,31 @@ npm test
 ```
 
 ## Test Commands
+
+### Multi-Framework Tests (NEW!)
+
+Run the same tests on different frameworks:
+
+```bash
+# Selenium WebDriver
+npm run test:selenium
+FRAMEWORK=selenium BROWSER=chrome tsx tests/runner.ts
+
+# WebDriverIO (default)
+npm test
+
+# Cypress
+npm run test:cypress
+FRAMEWORK=cypress BROWSER=chrome tsx tests/runner.ts
+```
+
+Run example multi-framework test:
+```bash
+# On all frameworks
+FRAMEWORK=selenium tsx tests/runner.ts
+FRAMEWORK=webdriverio tsx tests/runner.ts
+FRAMEWORK=cypress tsx tests/runner.ts
+```
 
 ### Individual Test Suites
 

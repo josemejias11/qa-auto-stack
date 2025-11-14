@@ -1,7 +1,7 @@
 {
-  "name": "webdriverio-mcp-server",
-  "version": "1.0.0",
-  "description": "MCP (Model Context Protocol) Server for Web Automation with WebDriverIO and TypeScript",
+  "name": "qa-auto-stack",
+  "version": "2.0.0",
+  "description": "Multi-Framework Test Automation Stack - Selenium, WebDriverIO, and Cypress with TypeScript",
   "type": "module",
   "main": "dist/mcp-server.js",
   "scripts": {
@@ -16,6 +16,8 @@
     "format": "prettier . --write",
     "format:check": "prettier . --check",
     "test": "npm run test:api && BROWSERS=chrome,firefox,safari npx wdio run ./wdio.conf.ts && npm run allure:regen-open",
+    "test:selenium": "FRAMEWORK=selenium npm run test:api && FRAMEWORK=selenium BROWSERS=chrome,firefox,safari tsx tests/runner.ts && npm run allure:regen-open",
+    "test:cypress": "FRAMEWORK=cypress npm run test:api && FRAMEWORK=cypress tsx tests/runner.ts && npm run allure:regen-open",
     "test:smoke": "npx wdio run ./wdio.conf.ts --spec ./tests/smoke/home.smoke.spec.ts && npm run allure:regen-open",
     "test:a11y": "npx wdio run ./wdio.conf.ts --spec ./tests/accessibility/a11y.spec.ts && npm run allure:regen-open",
     "test:links": "npx wdio run ./wdio.conf.ts --spec ./tests/links/link-health.spec.ts && npm run allure:regen-open",
@@ -34,15 +36,21 @@
     "validate:workflow": "tsx scripts/validate-workflow.ts"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^0.4.0",
+    "@modelcontextprotocol/sdk": "^1.22.0",
+    "cypress": "^13.18.2",
+    "selenium-webdriver": "^4.27.0",
     "webdriverio": "^9.20.0",
     "yaml": "^2.8.1"
   },
   "devDependencies": {
+    "@types/chai": "^5.0.1",
     "@types/mocha": "^10.0.10",
     "@types/node": "^24.10.1",
+    "@types/selenium-webdriver": "^4.1.28",
     "@typescript-eslint/eslint-plugin": "^8.46.4",
     "@typescript-eslint/parser": "^8.46.4",
+    "chai": "^5.1.2",
+    "glob": "^11.0.0",
     "@wdio/allure-reporter": "^9.20.0",
     "@wdio/cli": "^9.20.0",
     "@wdio/json-reporter": "^9.20.0",
@@ -68,11 +76,15 @@
   "keywords": [
     "mcp",
     "model-context-protocol",
+    "selenium",
     "webdriverio",
+    "cypress",
     "typescript",
     "automation",
+    "test-automation",
     "web-automation",
-    "server"
+    "multi-framework",
+    "qa"
   ],
   "author": "Development Team",
   "license": "MIT"

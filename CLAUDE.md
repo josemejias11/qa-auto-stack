@@ -2,6 +2,30 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## 🎯 Multi-Framework Architecture
+
+This project supports **THREE automation frameworks** with a unified interface:
+- **Selenium WebDriver** - Industry standard, direct WebDriver API
+- **WebDriverIO** - Modern wrapper with enhanced features (currently primary)
+- **Cypress** - Fast, in-browser testing framework
+
+**See [FRAMEWORK.md](FRAMEWORK.md) for detailed architecture documentation.**
+
+### Framework Selection
+```bash
+# Run tests with Selenium
+FRAMEWORK=selenium npm run test:selenium
+
+# Run tests with WebDriverIO (default)
+npm test
+
+# Run tests with Cypress
+FRAMEWORK=cypress npm run test:cypress
+
+# Run specific test on any framework
+FRAMEWORK=selenium SPEC=tests/examples/**/*.spec.ts tsx tests/runner.ts
+```
+
 ## Common Commands
 
 ### Building and Setup
@@ -74,18 +98,27 @@ npx tsx scripts/clean-cache.ts  # Clean npm and node_modules/.cache
 
 ### Project Structure
 - **src/**: Shared code and MCP server implementation
+  - **framework/**: Multi-framework adapter system (NEW!)
+    - **types.ts**: Common interfaces for all frameworks
+    - **base-adapter.ts**: Abstract base class
+    - **factory.ts**: Creates appropriate adapter based on config
+    - **adapters/**: Framework-specific implementations (Selenium, WebDriverIO, Cypress)
+    - **test-helper.ts**: Simplified test API
+    - **config.ts**: Default configurations
   - **mcp-server.ts**: Main MCP server entry point using Handler Registry pattern
   - **handlers/**: WebDriver tool handlers (navigation, interaction, inspection, forms, wait, scroll)
   - **tools/**: MCP tool definitions and schemas
   - **webdriver/**: WebDriver manager for browser session management
   - **constants/**: Centralized selectors, timeouts, and URLs
-- **tests/**: WebDriverIO test suites
+- **tests/**: Test suites (framework-agnostic)
+  - **examples/**: Multi-framework example tests
   - **smoke/**: Quick validation tests
   - **accessibility/**: Axe-core accessibility tests
   - **forms/**: Form interaction and validation tests
   - **links/**: Link health checks
   - **functional/**: Feature tests including video playback
   - **helpers/**: Test utility functions
+  - **runner.ts**: Multi-framework test runner
 - **scripts/**: Build and automation utilities
   - **newman-to-allure.ts**: Converts Newman JSON results to Allure format
   - **clean-reports.ts**: Report cleanup utility
