@@ -1,4 +1,4 @@
-name: CI - WebDriverIO MCP Server
+name: CI - Multi-Framework Tests
 
 on:
   push:
@@ -37,13 +37,13 @@ jobs:
           retention-days: 30
 
   browser-tests:
-    name: ${{ matrix.browser }} Tests
+    name: ${{ matrix.framework }} Tests
     needs: lint-and-build
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        browser: [Chrome, Firefox, Safari]
+        framework: [selenium, webdriverio, cypress]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -54,168 +54,20 @@ jobs:
       - run: npm run build
 
       - name: Setup Chrome
-        if: matrix.browser == 'Chrome'
         uses: browser-actions/setup-chrome@v1
         with:
           chrome-version: ${{ env.CHROME_VERSION }}
 
-      - name: Setup Firefox
-        if: matrix.browser == 'Firefox'
-        uses: browser-actions/setup-firefox@v1
-        with:
-          firefox-version: 'latest'
-
-      - name: Enable Safari
-        if: matrix.browser == 'Safari'
-        run: sudo safaridriver --enable
-
-      - name: Run tests
+      - name: Run ${{ matrix.framework }} tests
         env:
-          BROWSERS: ${{ matrix.browser }}
-          HEADLESS: ${{ matrix.browser != 'safari' && '1' || '' }}
-          LOG_LEVEL: ${{ matrix.browser == 'safari' && 'debug' || 'info' }}
-          SKIP_ALLURE_OPEN: 1
-        run: |
-          # Run all tests except video (handled separately)
-          npx wdio run ./wdio.conf.ts --exclude ./tests/functional/video-products.spec.ts
-          npm run allure:generate
-
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: test-reports-${{ matrix.browser }}
-          path: reports/
-          retention-days: 30
-
-  video-validation:
-    name: Video Playback Tests
-    needs: lint-and-build
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-      - run: npm ci
-      - run: npm run build
-      - uses: browser-actions/setup-chrome@v1
-        with:
-          chrome-version: ${{ env.CHROME_VERSION }}
-      - uses: browser-actions/setup-firefox@v1
-        with:
-          firefox-version: '122.0'
-      - run: sudo safaridriver --enable
-      - name: Check Firefox Version
-        run: |
-          /Users/runner/hostedtoolcache/firefox/122.0/arm64/Contents/MacOS/firefox --version || echo "Firefox binary not found or failed to run"
-      - name: Run video tests
-        env:
-          BROWSERS: chrome,firefox,safari
+          FRAMEWORK: ${{ matrix.framework }}
+          BROWSER: chrome
           HEADLESS: 1
-          SKIP_ALLURE_OPEN: 1
-        run: npm run test:video
+        run: npm run test:${{ matrix.framework }}
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: test-reports-video
+          name: test-reports-${{ matrix.framework }}
           path: reports/
           retention-days: 30
-
-  api-tests:
-    name: API Tests
-    needs: lint-and-build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-      - run: npm ci
-      - run: npm run test:api
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: api-test-results
-          path: reports/api/
-          retention-days: 30
-
-  mcp-validation:
-    name: MCP Server Validation
-    needs: lint-and-build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-      - run: npm ci
-      - run: npm run build
-      - uses: browser-actions/setup-chrome@v1
-        with:
-          chrome-version: ${{ env.CHROME_VERSION }}
-      - name: Test MCP server startup
-        run: |
-          echo "🔍 Testing MCP server startup..."
-          timeout 10s npm run mcp:server || [ $? -eq 124 ] && echo "✅ MCP server started successfully"
-      - name: Test WebDriver functionality
-        run: |
-          echo "🧪 Testing WebDriver functionality..."
-          node -e "
-          import('./dist/webdriver/manager.js').then(async ({ WebDriverManager }) => {
-            const manager = new WebDriverManager();
-            try {
-              console.log('✅ WebDriverManager imported successfully');
-              console.log('Available methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(manager)));
-            } catch (error) {
-              console.error('❌ WebDriverManager test failed:', error.message);
-              process.exit(1);
-            }
-          }).catch(error => {
-            console.error('❌ Import failed:', error.message);
-            process.exit(1);
-          });
-          "
-
-  security-scan:
-    name: Security Scan
-    needs: lint-and-build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-      - run: npm ci
-      - run: npm audit --audit-level=moderate || true
-      - run: npx audit-ci --config ./.auditciconfig.json || true
-
-  test-summary:
-    name: Test Summary
-    needs: [lint-and-build, browser-tests, video-validation, api-tests, mcp-validation, security-scan]
-    runs-on: ubuntu-latest
-    if: always()
-    steps:
-      - name: Create test summary
-        run: |
-          echo "# 🧪 WebDriverIO MCP Server - Test Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## 📊 Test Results Overview" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Job | Status | Notes |" >> $GITHUB_STEP_SUMMARY
-          echo "|------------|--------|-------------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Lint & Build | ${{ needs.lint-and-build.result }} | TypeScript compile & bundle |" >> $GITHUB_STEP_SUMMARY
-          echo "| Browser Tests | ${{ needs.browser-tests.result }} | Chrome, Firefox, Safari (parallel) |" >> $GITHUB_STEP_SUMMARY
-          echo "| Video Tests | ${{ needs.video-validation.result }} | Video playback validation across browsers |" >> $GITHUB_STEP_SUMMARY
-          echo "| API Tests | ${{ needs.api-tests.result }} | Postman/Newman API validation |" >> $GITHUB_STEP_SUMMARY
-          echo "| MCP Validation | ${{ needs.mcp-validation.result }} | MCP server startup and WebDriver functionality |" >> $GITHUB_STEP_SUMMARY
-          echo "| Security Scan | ${{ needs.security-scan.result }} | Dependency vulnerability assessment |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## 🎯 Branch: newsela" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ **Parallel Browser Testing**: Chrome, Firefox, Safari run simultaneously" >> $GITHUB_STEP_SUMMARY
-          echo "- 🎬 **Video Validation**: Dedicated video playback testing" >> $GITHUB_STEP_SUMMARY
-          echo "- 🔧 **TypeScript**: Full type safety and modern build process" >> $GITHUB_STEP_SUMMARY
-          echo "- 🚀 **MCP Tools**: Comprehensive web automation capabilities" >> $GITHUB_STEP_SUMMARY
