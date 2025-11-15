@@ -4,14 +4,14 @@
  */
 
 import { remote, type Browser } from 'webdriverio';
-import {
+import type {
   FrameworkConfig,
-  FrameworkType,
   Locator,
   NavigationResult,
   ScreenshotOptions,
   WaitOptions,
 } from '../types.js';
+import { FrameworkType } from '../types.js';
 import { BaseBrowserAdapter } from '../base-adapter.js';
 
 export class WebDriverIOAdapter extends BaseBrowserAdapter {
@@ -31,7 +31,11 @@ export class WebDriverIOAdapter extends BaseBrowserAdapter {
     // Configure headless mode
     if (this.config.headless) {
       if (this.config.browser === 'chrome') {
-        capabilities['goog:chromeOptions'].args = ['--headless=new', '--no-sandbox', '--disable-dev-shm-usage'];
+        capabilities['goog:chromeOptions'].args = [
+          '--headless=new',
+          '--no-sandbox',
+          '--disable-dev-shm-usage',
+        ];
       } else if (this.config.browser === 'firefox') {
         capabilities['moz:firefoxOptions'].args = ['-headless'];
       }

@@ -3,9 +3,8 @@
  * Abstract base class providing common functionality for all framework adapters
  */
 
-import {
+import type {
   FrameworkConfig,
-  FrameworkType,
   IBrowserAdapter,
   Locator,
   NavigationResult,
@@ -13,6 +12,7 @@ import {
   WaitOptions,
   FormField,
 } from './types.js';
+import { FrameworkType } from './types.js';
 
 export abstract class BaseBrowserAdapter implements IBrowserAdapter {
   protected config: FrameworkConfig;
@@ -72,13 +72,14 @@ export abstract class BaseBrowserAdapter implements IBrowserAdapter {
         case 'select':
           await this.selectOption(locator, value);
           break;
-        case 'checkbox':
+        case 'checkbox': {
           const isChecked = await this.getAttribute(locator, 'checked');
           const shouldCheck = value === 'true' || value === '1';
           if ((isChecked !== null) !== shouldCheck) {
             await this.click(locator);
           }
           break;
+        }
         case 'radio':
           await this.click(locator);
           break;
@@ -115,7 +116,10 @@ export abstract class BaseBrowserAdapter implements IBrowserAdapter {
     } else if (locator.startsWith('#')) {
       return { type: 'id', value: locator.substring(1) };
     } else if (locator.startsWith('[data-testid=')) {
-      return { type: 'testid', value: locator.match(/\[data-testid=['"](.+)['"]\]/)?.[1] || locator };
+      return {
+        type: 'testid',
+        value: locator.match(/\[data-testid=['"](.+)['"]\]/)?.[1] || locator,
+      };
     }
 
     return { type: 'css', value: locator };

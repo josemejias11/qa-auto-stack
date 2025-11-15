@@ -4,7 +4,7 @@
  */
 
 import { FrameworkFactory } from './factory.js';
-import { FrameworkConfig, IBrowserAdapter } from './types.js';
+import type { FrameworkConfig, IBrowserAdapter } from './types.js';
 
 export class TestHelper {
   private static instance: IBrowserAdapter | null = null;
@@ -17,7 +17,9 @@ export class TestHelper {
       return this.instance;
     }
 
-    const adapter = config ? FrameworkFactory.createAdapter(config) : FrameworkFactory.createFromEnv();
+    const adapter = config
+      ? FrameworkFactory.createAdapter(config)
+      : FrameworkFactory.createFromEnv();
 
     await adapter.initialize();
     this.instance = adapter;

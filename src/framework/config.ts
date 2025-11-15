@@ -3,7 +3,8 @@
  * Default configurations for each framework
  */
 
-import { FrameworkConfig, FrameworkType } from './types.js';
+import type { FrameworkConfig } from './types.js';
+import { FrameworkType } from './types.js';
 
 /**
  * Default configuration for WebDriverIO

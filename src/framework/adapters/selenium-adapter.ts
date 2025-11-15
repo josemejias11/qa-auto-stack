@@ -3,18 +3,19 @@
  * Implements the browser automation interface using Selenium WebDriver
  */
 
-import { Builder, By, WebDriver, until, WebElement } from 'selenium-webdriver';
+import { Builder, By, until } from 'selenium-webdriver';
+import type { WebDriver, WebElement } from 'selenium-webdriver';
 import chrome from 'selenium-webdriver/chrome.js';
 import firefox from 'selenium-webdriver/firefox.js';
 import safari from 'selenium-webdriver/safari.js';
-import {
+import type {
   FrameworkConfig,
-  FrameworkType,
   Locator,
   NavigationResult,
   ScreenshotOptions,
   WaitOptions,
 } from '../types.js';
+import { FrameworkType } from '../types.js';
 import { BaseBrowserAdapter } from '../base-adapter.js';
 
 export class SeleniumAdapter extends BaseBrowserAdapter {
@@ -30,7 +31,7 @@ export class SeleniumAdapter extends BaseBrowserAdapter {
 
     // Configure browser-specific options
     switch (browser) {
-      case 'chrome':
+      case 'chrome': {
         const chromeOptions = new chrome.Options();
         if (this.config.headless) {
           chromeOptions.addArguments('--headless=new');
@@ -42,12 +43,15 @@ export class SeleniumAdapter extends BaseBrowserAdapter {
           '--media-cache-size=536870912'
         );
         if (this.config.viewport) {
-          chromeOptions.addArguments(`--window-size=${this.config.viewport.width},${this.config.viewport.height}`);
+          chromeOptions.addArguments(
+            `--window-size=${this.config.viewport.width},${this.config.viewport.height}`
+          );
         }
         builder = builder.setChromeOptions(chromeOptions);
         break;
+      }
 
-      case 'firefox':
+      case 'firefox': {
         const firefoxOptions = new firefox.Options();
         if (this.config.headless) {
           firefoxOptions.addArguments('-headless');
@@ -58,11 +62,13 @@ export class SeleniumAdapter extends BaseBrowserAdapter {
         }
         builder = builder.setFirefoxOptions(firefoxOptions);
         break;
+      }
 
-      case 'safari':
+      case 'safari': {
         const safariOptions = new safari.Options();
         builder = builder.setSafariOptions(safariOptions);
         break;
+      }
     }
 
     this.driver = await builder.build();
@@ -221,7 +227,7 @@ export class SeleniumAdapter extends BaseBrowserAdapter {
     await this.driver.executeScript('window.scrollTo(0, document.body.scrollHeight);');
   }
 
-  async takeScreenshot(options?: ScreenshotOptions): Promise<string> {
+  async takeScreenshot(_options?: ScreenshotOptions): Promise<string> {
     const screenshot = await this.driver.takeScreenshot();
     return screenshot;
   }

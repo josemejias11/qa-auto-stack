@@ -8,14 +8,14 @@
  */
 
 import type Cypress from 'cypress';
-import {
+import type {
   FrameworkConfig,
-  FrameworkType,
   Locator,
   NavigationResult,
   ScreenshotOptions,
   WaitOptions,
 } from '../types.js';
+import { FrameworkType } from '../types.js';
 import { BaseBrowserAdapter } from '../base-adapter.js';
 
 export class CypressAdapter extends BaseBrowserAdapter {

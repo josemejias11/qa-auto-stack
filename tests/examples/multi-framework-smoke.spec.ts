@@ -7,7 +7,7 @@
 import { describe, it, before, after } from 'mocha';
 import { expect } from 'chai';
 import { TestHelper } from '../../src/framework/test-helper.js';
-import { FrameworkType } from '../../src/framework/types.js';
+import type { FrameworkType } from '../../src/framework/types.js';
 
 describe('Multi-Framework Smoke Test', () => {
   let browser: any;
@@ -39,7 +39,7 @@ describe('Multi-Framework Smoke Test', () => {
     this.timeout(15000);
 
     const result = await browser.navigate(TEST_URL);
-    expect(result.success).to.be.true;
+    expect(result.success).to.equal(true);
 
     const url = await browser.getCurrentUrl();
     expect(url).to.include('example.com');
@@ -59,10 +59,10 @@ describe('Multi-Framework Smoke Test', () => {
     await browser.waitForElement('h1', { visible: true, timeout: 10000 });
 
     const h1Exists = await browser.exists('h1');
-    expect(h1Exists).to.be.true;
+    expect(h1Exists).to.equal(true);
 
     const h1Visible = await browser.isVisible('h1');
-    expect(h1Visible).to.be.true;
+    expect(h1Visible).to.equal(true);
   });
 
   it('should interact with page elements', async function () {

@@ -3,7 +3,8 @@
  * Creates the appropriate browser adapter based on configuration
  */
 
-import { FrameworkConfig, FrameworkType, IBrowserAdapter } from './types.js';
+import type { FrameworkConfig, IBrowserAdapter } from './types.js';
+import { FrameworkType } from './types.js';
 import { WebDriverIOAdapter } from './adapters/webdriverio-adapter.js';
 import { SeleniumAdapter } from './adapters/selenium-adapter.js';
 import { CypressAdapter } from './adapters/cypress-adapter.js';
