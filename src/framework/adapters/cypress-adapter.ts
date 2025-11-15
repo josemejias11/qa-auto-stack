@@ -27,29 +27,30 @@ export class CypressAdapter extends BaseBrowserAdapter {
   }
 
   async initialize(): Promise<void> {
-    // Dynamic import of Cypress to avoid bundling issues
+    // Note: Cypress has a different architecture than Selenium/WebDriverIO
+    // It runs tests IN the browser through its own test runner
+    // This adapter provides a compatible interface but with limitations
+
+    // Import Cypress but don't open it (open() hangs waiting for interactive UI)
     const cypress = await import('cypress');
 
-    const cypressConfig: Partial<Cypress.ConfigOptions> = {
-      viewportWidth: this.config.viewport?.width || 1440,
-      viewportHeight: this.config.viewport?.height || 900,
-      defaultCommandTimeout: this.config.timeout || 10000,
-      screenshotsFolder: 'reports/screenshots',
-      videosFolder: 'reports/videos',
-      video: false,
-    };
+    // Store the Cypress module for potential future use
+    this.cypressInstance = cypress.default;
 
-    // Open Cypress programmatically
-    this.cypressInstance = await cypress.default.open({
-      config: cypressConfig,
-      browser: this.config.browser || 'chrome',
-    });
+    // Set the global cy reference (will be available when running in Cypress context)
+    // @ts-ignore - cy is a global in Cypress context
+    if (typeof cy !== 'undefined') {
+      // @ts-ignore
+      this.driver = cy;
+    }
+
+    // Initialize successful - actual Cypress context is set up by Cypress test runner
+    console.log('⚠️  Cypress adapter initialized. Note: Some operations require running through Cypress test runner.');
   }
 
   async close(): Promise<void> {
-    if (this.cypressInstance) {
-      await this.cypressInstance.close();
-    }
+    // Cleanup - Cypress context cleanup is handled by Cypress test runner
+    this.cypressInstance = null;
   }
 
   async navigate(url: string): Promise<NavigationResult> {

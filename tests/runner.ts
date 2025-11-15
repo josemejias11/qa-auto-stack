@@ -19,6 +19,14 @@ async function runTests() {
   console.log(`🚀 Running tests with ${framework.toUpperCase()}`);
   console.log(`========================================\n`);
 
+  // Warn about Cypress limitations
+  if (framework === 'cypress') {
+    console.log(`⚠️  WARNING: Cypress has a different architecture than Selenium/WebDriverIO.`);
+    console.log(`⚠️  Cypress tests should ideally be run through Cypress's own CLI:`);
+    console.log(`⚠️    npx cypress run --spec "tests/examples/**/*.spec.ts"\n`);
+    console.log(`⚠️  This runner provides limited Cypress compatibility.\n`);
+  }
+
   // Create Mocha instance
   const mocha = new Mocha({
     timeout: 30000,
