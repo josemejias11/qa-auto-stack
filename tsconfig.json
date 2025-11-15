@@ -19,6 +19,6 @@
     "emitDecoratorMetadata": true,
     "types": ["node"]
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts", "examples/**/*.ts"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src/**/*.ts", "tests/**/*.ts"],
+  "exclude": ["node_modules", "dist", "tests/examples"]
 }
