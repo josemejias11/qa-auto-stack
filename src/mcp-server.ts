@@ -16,10 +16,17 @@ class MCPWebDriverServer {
   private webDriverManager: WebDriverManager;
 
   constructor() {
-    this.server = new Server({
-      name: 'webdriver-mcp-server',
-      version: '1.0.0',
-    });
+    this.server = new Server(
+      {
+        name: 'webdriver-mcp-server',
+        version: '1.0.0',
+      },
+      {
+        capabilities: {
+          tools: {},
+        },
+      }
+    );
 
     this.webDriverManager = new WebDriverManager();
     this.setupToolHandlers();
