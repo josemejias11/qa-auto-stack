@@ -19,7 +19,7 @@ import { FrameworkType } from '../types.js';
 import { BaseBrowserAdapter } from '../base-adapter.js';
 
 export class CypressAdapter extends BaseBrowserAdapter {
-  protected driver!: typeof Cypress;
+  declare protected driver: typeof Cypress;
   private cypressInstance: any;
 
   constructor(config: FrameworkConfig) {
@@ -31,8 +31,6 @@ export class CypressAdapter extends BaseBrowserAdapter {
     const cypress = await import('cypress');
 
     const cypressConfig: Partial<Cypress.ConfigOptions> = {
-      browser: this.config.browser || 'chrome',
-      headless: this.config.headless ?? true,
       viewportWidth: this.config.viewport?.width || 1440,
       viewportHeight: this.config.viewport?.height || 900,
       defaultCommandTimeout: this.config.timeout || 10000,
@@ -43,7 +41,6 @@ export class CypressAdapter extends BaseBrowserAdapter {
 
     // Open Cypress programmatically
     this.cypressInstance = await cypress.default.open({
-      configFile: false,
       config: cypressConfig,
       browser: this.config.browser || 'chrome',
     });
@@ -307,14 +304,13 @@ export class CypressAdapter extends BaseBrowserAdapter {
    * This wraps Cypress commands to work with our Promise-based API
    */
   private async runCypressCommand<T>(command: () => T | Cypress.Chainable<T>): Promise<T> {
-    return new Promise((resolve, reject) => {
+    return new Promise<T>((resolve, reject) => {
       try {
         const result = command();
         if (result && typeof result === 'object' && 'then' in result) {
-          (result as Cypress.Chainable<T>).then(
-            (value) => resolve(value as T),
-            (error) => reject(error)
-          );
+          (result as Cypress.Chainable<T>).then((value: T) => {
+            resolve(value);
+          });
         } else {
           resolve(result as T);
         }

@@ -19,7 +19,7 @@ import { FrameworkType } from '../types.js';
 import { BaseBrowserAdapter } from '../base-adapter.js';
 
 export class SeleniumAdapter extends BaseBrowserAdapter {
-  protected driver!: WebDriver;
+  declare protected driver: WebDriver;
 
   constructor(config: FrameworkConfig) {
     super(config);

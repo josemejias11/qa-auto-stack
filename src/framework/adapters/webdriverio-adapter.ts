@@ -15,7 +15,7 @@ import { FrameworkType } from '../types.js';
 import { BaseBrowserAdapter } from '../base-adapter.js';
 
 export class WebDriverIOAdapter extends BaseBrowserAdapter {
-  protected driver!: Browser;
+  declare protected driver: Browser;
 
   constructor(config: FrameworkConfig) {
     super(config);
@@ -197,11 +197,13 @@ export class WebDriverIOAdapter extends BaseBrowserAdapter {
   }
 
   async takeScreenshot(options?: ScreenshotOptions): Promise<string> {
-    return await this.driver.saveScreenshot(options?.path || 'screenshot.png');
+    const path = options?.path || 'screenshot.png';
+    await this.driver.saveScreenshot(path);
+    return path;
   }
 
   async executeScript<T>(script: string, ...args: any[]): Promise<T> {
-    return await this.driver.execute(script, ...args);
+    return (await this.driver.execute(script, ...args)) as T;
   }
 
   async getCookies(): Promise<any[]> {
