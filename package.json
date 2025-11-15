@@ -9,7 +9,6 @@
     "start": "node dist/mcp-server.js",
     "dev": "tsx src/mcp-server.ts",
     "setup": "npm install --ignore-scripts && npm run build",
-    "postinstall": "echo '\nNote: Run with --ignore-scripts to avoid binary download failures in CI/CD'",
     "clean": "rm -rf dist/ reports/ test-results/",
     "clean:reports": "tsx scripts/clean-reports.ts",
     "lint": "eslint . --ext .ts",
