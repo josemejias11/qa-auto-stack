@@ -118,11 +118,11 @@ export interface IBrowserAdapter {
   takeScreenshot(options?: ScreenshotOptions): Promise<string>;
 
   // JavaScript execution
-  executeScript<T>(script: string, ...args: any[]): Promise<T>;
+  executeScript<T>(script: string, ...args: unknown[]): Promise<T>;
 
   // Cookie management
-  getCookies(): Promise<any[]>;
-  setCookie(cookie: any): Promise<void>;
+  getCookies(): Promise<Cookie[]>;
+  setCookie(cookie: Cookie): Promise<void>;
   deleteCookie(name: string): Promise<void>;
   deleteAllCookies(): Promise<void>;
 
@@ -133,5 +133,19 @@ export interface IBrowserAdapter {
 
   // Framework-specific information
   getFrameworkType(): FrameworkType;
-  getDriver<T = any>(): T; // Returns underlying driver instance
+  getDriver<T = unknown>(): T; // Returns underlying driver instance
+}
+
+/**
+ * Cookie object
+ */
+export interface Cookie {
+  name: string;
+  value: string;
+  domain?: string;
+  path?: string;
+  expires?: number;
+  httpOnly?: boolean;
+  secure?: boolean;
+  sameSite?: 'Strict' | 'Lax' | 'None';
 }

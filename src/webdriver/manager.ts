@@ -54,7 +54,8 @@ export class WebDriverManager {
   }
 
   async setHeadlessMode(headless: boolean): Promise<void> {
-    const chromeOptions = (this.options.capabilities as any)['goog:chromeOptions'];
+    const capabilities = this.options.capabilities as Record<string, unknown>;
+    const chromeOptions = capabilities['goog:chromeOptions'] as { args: string[] };
     if (headless) {
       if (!chromeOptions.args.includes('--headless')) {
         chromeOptions.args.push('--headless');
@@ -72,7 +73,8 @@ export class WebDriverManager {
   }
 
   async setWindowSize(width: number, height: number): Promise<void> {
-    const chromeOptions = (this.options.capabilities as any)['goog:chromeOptions'];
+    const capabilities = this.options.capabilities as Record<string, unknown>;
+    const chromeOptions = capabilities['goog:chromeOptions'] as { args: string[] };
     const sizeArgIndex = chromeOptions.args.findIndex((arg: string) =>
       arg.startsWith('--window-size=')
     );

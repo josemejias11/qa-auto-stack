@@ -14,13 +14,14 @@ import type {
   NavigationResult,
   ScreenshotOptions,
   WaitOptions,
+  Cookie,
 } from '../types.js';
 import { FrameworkType } from '../types.js';
 import { BaseBrowserAdapter } from '../base-adapter.js';
 
 export class CypressAdapter extends BaseBrowserAdapter {
   declare protected driver: typeof Cypress;
-  private cypressInstance: any;
+  private cypressInstance: typeof Cypress | null = null;
 
   constructor(config: FrameworkConfig) {
     super(config);
@@ -38,14 +39,16 @@ export class CypressAdapter extends BaseBrowserAdapter {
     this.cypressInstance = cypress.default;
 
     // Set the global cy reference (will be available when running in Cypress context)
-    // @ts-ignore - cy is a global in Cypress context
+
     if (typeof cy !== 'undefined') {
-      // @ts-ignore
+      // @ts-expect-error - driver is typed as unknown in base class
       this.driver = cy;
     }
 
     // Initialize successful - actual Cypress context is set up by Cypress test runner
-    console.log('⚠️  Cypress adapter initialized. Note: Some operations require running through Cypress test runner.');
+    console.log(
+      '⚠️  Cypress adapter initialized. Note: Some operations require running through Cypress test runner.'
+    );
   }
 
   async close(): Promise<void> {
@@ -212,7 +215,7 @@ export class CypressAdapter extends BaseBrowserAdapter {
     });
   }
 
-  async executeScript<T>(script: string, ...args: any[]): Promise<T> {
+  async executeScript<T>(script: string, ...args: unknown[]): Promise<T> {
     return await this.runCypressCommand(() => {
       return cy.window().then((win) => {
         const func = new Function('window', ...args.map((_, i) => `arg${i}`), `return ${script}`);
@@ -221,15 +224,20 @@ export class CypressAdapter extends BaseBrowserAdapter {
     });
   }
 
-  async getCookies(): Promise<any[]> {
+  async getCookies(): Promise<Cookie[]> {
     return await this.runCypressCommand(() => {
-      return cy.getCookies();
+      return cy.getCookies() as unknown as Cookie[];
     });
   }
 
-  async setCookie(cookie: any): Promise<void> {
+  async setCookie(cookie: Cookie): Promise<void> {
     await this.runCypressCommand(() => {
-      cy.setCookie(cookie.name, cookie.value, cookie);
+      // Convert our Cookie type to Cypress's SetCookieOptions type
+      const cypressCookie = {
+        ...cookie,
+        sameSite: cookie.sameSite?.toLowerCase() as 'strict' | 'lax' | 'no_restriction' | undefined,
+      };
+      cy.setCookie(cookie.name, cookie.value, cypressCookie);
     });
   }
 

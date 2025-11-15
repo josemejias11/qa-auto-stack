@@ -14,6 +14,7 @@ import type {
   NavigationResult,
   ScreenshotOptions,
   WaitOptions,
+  Cookie,
 } from '../types.js';
 import { FrameworkType } from '../types.js';
 import { BaseBrowserAdapter } from '../base-adapter.js';
@@ -232,15 +233,15 @@ export class SeleniumAdapter extends BaseBrowserAdapter {
     return screenshot;
   }
 
-  async executeScript<T>(script: string, ...args: any[]): Promise<T> {
+  async executeScript<T>(script: string, ...args: unknown[]): Promise<T> {
     return (await this.driver.executeScript(script, ...args)) as T;
   }
 
-  async getCookies(): Promise<any[]> {
-    return await this.driver.manage().getCookies();
+  async getCookies(): Promise<Cookie[]> {
+    return (await this.driver.manage().getCookies()) as Cookie[];
   }
 
-  async setCookie(cookie: any): Promise<void> {
+  async setCookie(cookie: Cookie): Promise<void> {
     await this.driver.manage().addCookie(cookie);
   }
 

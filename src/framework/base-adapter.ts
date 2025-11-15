@@ -11,12 +11,13 @@ import type {
   ScreenshotOptions,
   WaitOptions,
   FormField,
+  Cookie,
 } from './types.js';
-import { FrameworkType } from './types.js';
+import type { FrameworkType } from './types.js';
 
 export abstract class BaseBrowserAdapter implements IBrowserAdapter {
   protected config: FrameworkConfig;
-  protected driver: any;
+  protected driver: unknown;
 
   constructor(config: FrameworkConfig) {
     this.config = {
@@ -52,9 +53,9 @@ export abstract class BaseBrowserAdapter implements IBrowserAdapter {
   abstract scrollToTop(): Promise<void>;
   abstract scrollToBottom(): Promise<void>;
   abstract takeScreenshot(options?: ScreenshotOptions): Promise<string>;
-  abstract executeScript<T>(script: string, ...args: any[]): Promise<T>;
-  abstract getCookies(): Promise<any[]>;
-  abstract setCookie(cookie: any): Promise<void>;
+  abstract executeScript<T>(script: string, ...args: unknown[]): Promise<T>;
+  abstract getCookies(): Promise<Cookie[]>;
+  abstract setCookie(cookie: Cookie): Promise<void>;
   abstract deleteCookie(name: string): Promise<void>;
   abstract deleteAllCookies(): Promise<void>;
   abstract getWindowSize(): Promise<{ width: number; height: number }>;
@@ -98,7 +99,7 @@ export abstract class BaseBrowserAdapter implements IBrowserAdapter {
   /**
    * Get the underlying driver instance
    */
-  getDriver<T = any>(): T {
+  getDriver<T = unknown>(): T {
     return this.driver as T;
   }
 

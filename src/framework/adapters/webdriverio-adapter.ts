@@ -10,6 +10,7 @@ import type {
   NavigationResult,
   ScreenshotOptions,
   WaitOptions,
+  Cookie,
 } from '../types.js';
 import { FrameworkType } from '../types.js';
 import { BaseBrowserAdapter } from '../base-adapter.js';
@@ -22,27 +23,31 @@ export class WebDriverIOAdapter extends BaseBrowserAdapter {
   }
 
   async initialize(): Promise<void> {
-    const capabilities: any = {
+    const capabilities: {
+      browserName: string;
+      'goog:chromeOptions'?: { args: string[] };
+      'moz:firefoxOptions'?: { args: string[] };
+    } = {
       browserName: this.config.browser || 'chrome',
-      'goog:chromeOptions': {},
-      'moz:firefoxOptions': {},
+      'goog:chromeOptions': { args: [] },
+      'moz:firefoxOptions': { args: [] },
     };
 
     // Configure headless mode
     if (this.config.headless) {
-      if (this.config.browser === 'chrome') {
+      if (this.config.browser === 'chrome' && capabilities['goog:chromeOptions']) {
         capabilities['goog:chromeOptions'].args = [
           '--headless=new',
           '--no-sandbox',
           '--disable-dev-shm-usage',
         ];
-      } else if (this.config.browser === 'firefox') {
+      } else if (this.config.browser === 'firefox' && capabilities['moz:firefoxOptions']) {
         capabilities['moz:firefoxOptions'].args = ['-headless'];
       }
     }
 
     // Configure cache for performance
-    if (this.config.browser === 'chrome') {
+    if (this.config.browser === 'chrome' && capabilities['goog:chromeOptions']) {
       capabilities['goog:chromeOptions'].args = [
         ...(capabilities['goog:chromeOptions'].args || []),
         '--disk-cache-size=536870912',
@@ -202,16 +207,21 @@ export class WebDriverIOAdapter extends BaseBrowserAdapter {
     return path;
   }
 
-  async executeScript<T>(script: string, ...args: any[]): Promise<T> {
+  async executeScript<T>(script: string, ...args: unknown[]): Promise<T> {
     return (await this.driver.execute(script, ...args)) as T;
   }
 
-  async getCookies(): Promise<any[]> {
-    return await this.driver.getCookies();
+  async getCookies(): Promise<Cookie[]> {
+    return (await this.driver.getCookies()) as Cookie[];
   }
 
-  async setCookie(cookie: any): Promise<void> {
-    await this.driver.setCookies(cookie);
+  async setCookie(cookie: Cookie): Promise<void> {
+    // Convert our Cookie type to WebDriverIO's Cookie type
+    const wdioCookie = {
+      ...cookie,
+      sameSite: cookie.sameSite?.toLowerCase() as 'strict' | 'lax' | 'none' | undefined,
+    };
+    await this.driver.setCookies(wdioCookie as Parameters<typeof this.driver.setCookies>[0]);
   }
 
   async deleteCookie(name: string): Promise<void> {
