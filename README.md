@@ -1,65 +1,48 @@
-# QA Automation Stack
+# QA Automation Stack - MCP Server
 
-🚀 **Multi-Framework Test Automation** with TypeScript - Write tests once, run on Selenium, WebDriverIO, or Cypress.
+🚀 **Model Context Protocol Server for Multi-Framework Browser Automation** - WebDriver automation tools accessible via MCP with support for Selenium, WebDriverIO, and Cypress.
 
-## 🎯 Key Feature: Framework-Agnostic Testing
+## 🎯 Overview
 
-**Write tests once, run on ANY framework:**
+An MCP (Model Context Protocol) server that provides browser automation capabilities through a unified interface. The server exposes WebDriver automation tools that AI assistants can use to interact with web browsers.
 
-```typescript
-// Same test code runs on Selenium, WebDriverIO, OR Cypress!
-import { TestHelper } from './src/framework/test-helper.js';
-import { FrameworkType } from './src/framework/types.js';
-
-const browser = await TestHelper.init({
-  framework: FrameworkType.SELENIUM, // or WEBDRIVERIO, or CYPRESS
-  browser: 'chrome',
-  headless: true,
-});
-
-await browser.navigate('https://example.com');
-await browser.click('.submit-button');
-const title = await browser.getTitle();
-```
-
-**Switch frameworks with a single environment variable:**
-```bash
-FRAMEWORK=selenium npm run test:selenium
-FRAMEWORK=webdriverio npm run test:webdriverio
-FRAMEWORK=cypress npm run test:cypress
-```
-
-**📚 See [FRAMEWORK.md](FRAMEWORK.md) for complete architecture documentation.**
-
-## ✨ Features
-
-- **🔄 Multi-Framework Support**: Unified API for Selenium WebDriver, WebDriverIO, and Cypress
-- **🎨 Adapter Pattern**: Clean architecture with framework-specific adapters
-- **⚡ Easy Framework Switching**: Change frameworks without rewriting tests
-- **💪 TypeScript**: Full type safety and modern development experience
-- **🔌 Extensible**: Easy to add new frameworks (Playwright, TestCafe, etc.)
-- **🤖 MCP Server**: Model Context Protocol server for automation tools
-- **📦 Zero Vendor Lock-in**: Not tied to any single framework
+**Key Features:**
+- **MCP Server**: Exposes browser automation as MCP tools
+- **Multi-Framework Support**: Adapters for Selenium, WebDriverIO, and Cypress
+- **Unified API**: Framework-agnostic interface for browser automation
+- **Type-Safe**: Full TypeScript implementation with proper type definitions
+- **Clean Architecture**: Handler Registry pattern for extensible tool handling
 
 ## 🛠️ Tech Stack
 
-### Supported Frameworks
-- **Selenium WebDriver** (v4.27+) - Industry standard, broadest browser support
-- **WebDriverIO** (v9.20+) - Modern wrapper with enhanced features
-- **Cypress** (v13.18+) - Fast, in-browser testing framework
+### Core Dependencies
+- **@modelcontextprotocol/sdk** (^1.22.0) - MCP server implementation
+- **yaml** (^2.8.1) - Configuration file support
+- **TypeScript** (5.0+) - Type safety and modern development
 
-### Additional Tools
-- **TypeScript** 5.0+ for type safety
-- **Mocha** for test running
-- **Chai** for assertions
-- **Chromedriver/Geckodriver** for browser automation
+### Optional Framework Adapters (Peer Dependencies)
+- **Selenium WebDriver** (^4.27.0) - Industry standard WebDriver API
+- **WebDriverIO** (^9.20.0) - Modern wrapper with enhanced features
+- **Cypress** (^13.16.0) - Fast, in-browser testing framework
+
+> **Note:** Framework dependencies are optional peer dependencies. Install only what you need:
+> ```bash
+> npm install selenium-webdriver webdriverio cypress
+> ```
 
 ## 🚀 Quick Start
 
 ### 1. Install Dependencies
 
 ```bash
-npm install
+# Use --ignore-scripts to avoid binary download failures
+npm install --ignore-scripts
+```
+
+Or use the setup script:
+
+```bash
+npm run setup
 ```
 
 ### 2. Build the Project
@@ -68,317 +51,276 @@ npm install
 npm run build
 ```
 
-### 3. Run Example Tests
+### 3. Start MCP Server
 
 ```bash
-# Run with WebDriverIO (default)
-npm test
+# Development mode (TypeScript)
+npm run dev
 
-# Run with Selenium
-npm run test:selenium
+# Production mode (compiled)
+npm start
 
-# Run with Cypress
-npm run test:cypress
-
-# Run on all frameworks
-npm run test:all
+# Or directly
+npm run mcp:server
 ```
 
-## 📝 Test Commands
-
-### Framework-Specific Tests
+## 📋 Available Scripts
 
 ```bash
-# Selenium WebDriver
-npm run test:selenium
-FRAMEWORK=selenium tsx tests/runner.ts
-
-# WebDriverIO
-npm run test:webdriverio
-FRAMEWORK=webdriverio tsx tests/runner.ts
-
-# Cypress
-npm run test:cypress
-FRAMEWORK=cypress tsx tests/runner.ts
-
-# All frameworks sequentially
-npm run test:all
+npm run build          # Compile TypeScript to dist/
+npm start              # Run compiled MCP server
+npm run dev            # Run MCP server in development mode
+npm run setup          # Install deps (--ignore-scripts) + build
+npm run clean          # Remove dist/, reports/, test-results/
+npm run lint           # Check code style with ESLint
+npm run lint:fix       # Auto-fix linting issues
+npm run format         # Format code with Prettier
+npm run format:check   # Check formatting without changes
+npm run mcp:server     # Run MCP server with tsx
 ```
 
-### Browser-Specific Tests
+## 🔌 MCP Tools
 
-```bash
-# Chrome
-npm run test:chrome
-BROWSER=chrome tsx tests/runner.ts
+The MCP server exposes the following browser automation tools:
 
-# Firefox
-npm run test:firefox
-BROWSER=firefox tsx tests/runner.ts
+### Navigation Tools
+- `navigate` - Navigate to a URL
+- `go_back` - Go back in browser history
+- `go_forward` - Go forward in browser history
+- `refresh_page` - Refresh the current page
 
-# Safari (macOS only)
-npm run test:safari
-BROWSER=safari tsx tests/runner.ts
+### Interaction Tools
+- `click` - Click an element
+- `type` - Type text into an element
+- `hover` - Hover over an element
 
-# Headless mode
-npm run test:headless
-HEADLESS=1 tsx tests/runner.ts
-```
+### Inspection Tools
+- `get_text` - Get text content of an element
+- `get_page_title` - Get the current page title
+- `get_current_url` - Get the current URL
+- `screenshot` - Take a screenshot
 
-### Custom Test Runs
+### Form Tools
+- `fill_form` - Fill multiple form fields
+- `select_option` - Select an option from a dropdown
 
-```bash
-# Specific framework + browser + headless
-FRAMEWORK=selenium BROWSER=firefox HEADLESS=1 tsx tests/runner.ts
+### Wait Tools
+- `wait_for_element` - Wait for an element to appear
 
-# Run specific test file
-FRAMEWORK=cypress SPEC=tests/examples/**/*.spec.ts tsx tests/runner.ts
-
-# Custom timeout
-TIMEOUT=15000 tsx tests/runner.ts
-```
+### Scroll Tools
+- `scroll_to` - Scroll to a specific element
 
 ## 🏗️ Architecture
 
+### Project Structure
+
+```
+src/
+├── mcp-server.ts              # MCP server entry point
+├── framework/                 # Multi-framework adapter system
+│   ├── types.ts              # Common interfaces
+│   ├── base-adapter.ts       # Abstract base class
+│   ├── factory.ts            # Creates appropriate adapter
+│   ├── config.ts             # Default configurations
+│   ├── test-helper.ts        # Simplified API
+│   └── adapters/             # Framework implementations
+│       ├── selenium-adapter.ts
+│       ├── webdriverio-adapter.ts
+│       └── cypress-adapter.ts
+├── handlers/                  # MCP tool handlers
+│   ├── base-handler.ts       # Handler interface
+│   ├── navigation-handlers.ts
+│   ├── interaction-handlers.ts
+│   ├── inspection-handlers.ts
+│   ├── form-handlers.ts
+│   ├── wait-handlers.ts
+│   ├── scroll-handlers.ts
+│   └── index.ts              # Handler registry
+├── tools/                     # MCP tool definitions
+│   └── index.ts              # Tool schemas
+└── webdriver/                 # WebDriver manager
+    └── manager.ts            # Browser session management
+```
+
+### Handler Registry Pattern
+
+The MCP server uses a clean Handler Registry pattern:
+
+1. **Base Handler Interface**: All handlers implement `Handler<TArgs>`
+2. **Handler Registry**: Maps tool names to handler instances
+3. **Specialized Handlers**: Each tool has its own handler class
+4. **Benefits**: Open/Closed principle, single responsibility, testable
+
+#### Adding New Tools
+
+1. Create handler class in `src/handlers/*-handlers.ts`
+2. Register in `handlerRegistry` Map in `src/handlers/index.ts`
+3. Add tool definition in `src/tools/index.ts`
+
 ### Framework Adapter Pattern
 
-```
-src/framework/
-├── types.ts                    # Common interfaces (IBrowserAdapter)
-├── base-adapter.ts             # Abstract base class
-├── factory.ts                  # Creates appropriate adapter
-├── config.ts                   # Default configurations
-├── test-helper.ts              # Simplified test API
-└── adapters/
-    ├── selenium-adapter.ts     # Selenium implementation
-    ├── webdriverio-adapter.ts  # WebDriverIO implementation
-    └── cypress-adapter.ts      # Cypress implementation
-```
-
-### Unified API
-
-All frameworks support the same operations:
-
-- **Navigation**: navigate, back, forward, refresh, getCurrentUrl, getTitle
-- **Interaction**: click, type, clear, hover
-- **Inspection**: getText, getAttribute, isVisible, isEnabled, exists
-- **Waits**: waitForElement, waitForUrl
-- **Forms**: fillForm, selectOption
-- **Scroll**: scrollTo, scrollToTop, scrollToBottom
-- **Screenshots**: takeScreenshot
-- **JavaScript**: executeScript
-- **Cookies**: getCookies, setCookie, deleteCookie
-- **Window**: getWindowSize, setWindowSize, maximizeWindow
-
-## 📚 Writing Tests
-
-### Basic Test Structure
+The unified browser automation API works across multiple frameworks:
 
 ```typescript
-import { describe, it, before, after } from 'mocha';
-import { expect } from 'chai';
-import { TestHelper } from '../../src/framework/test-helper.js';
-import { FrameworkType } from '../../src/framework/types.js';
+// All frameworks support the same interface
+interface IBrowserAdapter {
+  // Navigation
+  navigate(url: string): Promise<NavigationResult>;
+  back(): Promise<void>;
+  forward(): Promise<void>;
 
-describe('My Test Suite', () => {
-  let browser: any;
+  // Interaction
+  click(locator: string | Locator): Promise<void>;
+  type(locator: string | Locator, text: string): Promise<void>;
 
-  before(async function () {
-    this.timeout(30000);
+  // Inspection
+  getText(locator: string | Locator): Promise<string>;
+  isVisible(locator: string | Locator): Promise<boolean>;
 
-    browser = await TestHelper.init({
-      framework: (process.env.FRAMEWORK || 'webdriverio') as FrameworkType,
-      browser: process.env.BROWSER || 'chrome',
-      headless: process.env.HEADLESS === '1',
-      timeout: 10000,
-    });
-  });
-
-  after(async function () {
-    await TestHelper.close();
-  });
-
-  it('should navigate and interact', async function () {
-    await browser.navigate('https://example.com');
-
-    const title = await browser.getTitle();
-    expect(title).to.include('Example');
-
-    await browser.click('h1');
-    await browser.scrollToBottom();
-  });
-});
+  // ... and many more
+}
 ```
 
-### Using Factory Pattern
+## 🔧 Configuration
+
+### Framework Selection
+
+Configure which browser automation framework to use:
 
 ```typescript
 import { FrameworkFactory, FrameworkType } from './src/framework/index.js';
 
-// Create adapter directly
+// Create adapter
 const browser = FrameworkFactory.createAdapter({
-  framework: FrameworkType.SELENIUM,
+  framework: FrameworkType.SELENIUM, // or WEBDRIVERIO, CYPRESS
   browser: 'chrome',
   headless: true,
+  timeout: 10000,
+  viewport: { width: 1440, height: 900 }
 });
 
 await browser.initialize();
 await browser.navigate('https://example.com');
 await browser.close();
-
-// Or create from environment variables
-const browser2 = FrameworkFactory.createFromEnv();
 ```
-
-## 🔧 Configuration
 
 ### Environment Variables
 
 ```bash
-# Framework selection
-FRAMEWORK=selenium|webdriverio|cypress     # Default: webdriverio
-
-# Browser selection
-BROWSER=chrome|firefox|safari              # Default: chrome
-
-# Headless mode
-HEADLESS=1                                 # Default: false
-
-# Custom timeout (ms)
-TIMEOUT=15000                              # Default: 10000
-
-# Viewport size
-VIEWPORT_WIDTH=1920                        # Default: 1440
-VIEWPORT_HEIGHT=1080                       # Default: 900
-
-# Base URL
-BASE_URL=https://example.com               # Default: none
-
-# Test file pattern
-SPEC=tests/**/*.spec.ts                    # Default: tests/examples/**/*.spec.ts
+FRAMEWORK=selenium|webdriverio|cypress   # Framework selection
+BROWSER=chrome|firefox|safari            # Browser selection
+HEADLESS=1                               # Headless mode
+TIMEOUT=15000                            # Custom timeout (ms)
 ```
 
-### Programmatic Configuration
+## 📦 Installation Notes
 
-```typescript
-const config: FrameworkConfig = {
-  framework: FrameworkType.CYPRESS,
-  browser: 'firefox',
-  headless: true,
-  timeout: 15000,
-  baseUrl: 'https://example.com',
-  viewport: {
-    width: 1920,
-    height: 1080,
-  },
-};
+### Why `--ignore-scripts`?
 
-const browser = FrameworkFactory.createAdapter(config);
-```
+We use `--ignore-scripts` to avoid:
+- **Binary downloads** - chromedriver, geckodriver, Cypress binary
+- **Network failures** - Download 403 errors in CI/CD environments
+- **Deprecation warnings** - Cleaner install output
 
-## 🎓 Examples
+The `.npmrc` file sets `loglevel=error` to suppress deprecation warnings from deep dependency chains.
 
-See `tests/examples/multi-framework-smoke.spec.ts` for a complete working example that demonstrates:
+### Installing Framework Dependencies
 
-- Framework initialization
-- Navigation and page interaction
-- Element inspection and assertions
-- Screenshots
-- JavaScript execution
-- Cookie management
-- Scroll operations
-
-## 🔌 MCP Server
-
-The project includes an MCP (Model Context Protocol) server for browser automation:
+Framework dependencies are **optional peer dependencies**. Install only what you need:
 
 ```bash
-# Start MCP server
-npm run mcp:server
+# Install all frameworks
+npm install selenium-webdriver webdriverio cypress --ignore-scripts
 
-# Or use in development mode
-npm run dev
+# Or install specific frameworks
+npm install selenium-webdriver --save-dev
+npm install webdriverio --save-dev
+npm install cypress --save-dev --ignore-scripts
 ```
 
-## 🧹 Maintenance
+## 🔒 Type Safety
 
-### Code Quality
+All `any` types have been replaced with proper TypeScript types:
 
-```bash
-# Lint code
-npm run lint
-
-# Auto-fix linting issues
-npm run lint:fix
-
-# Format code
-npm run format
-
-# Check formatting
-npm run format:check
-```
-
-### Cleanup
-
-```bash
-# Clean build and reports
-npm run clean
-
-# Clean reports only
-npm run clean:reports
-```
+- `Cookie` interface for cookie operations
+- `unknown` for generic driver and script arguments
+- Proper type guards for framework capabilities
+- Full type inference throughout the codebase
 
 ## 🚀 Benefits
 
-### 1. **Framework Independence**
-Not locked into any single framework. Switch anytime without rewriting tests.
+### 1. **MCP Integration**
+Browser automation accessible to AI assistants via Model Context Protocol.
 
-### 2. **Future-Proof**
-When new frameworks emerge (or existing ones improve), add a new adapter without touching tests.
+### 2. **Framework Independence**
+Not locked into any single framework. Switch adapters without rewriting tools.
 
-### 3. **Team Flexibility**
-Different team members can use their preferred framework for development and debugging.
+### 3. **Clean Architecture**
+Handler Registry pattern makes adding new tools straightforward.
 
-### 4. **Easy Migration**
-Migrate from one framework to another incrementally, test by test.
+### 4. **Type Safety**
+Full TypeScript support with proper type definitions.
 
-### 5. **Learning Tool**
-Compare framework behaviors and performance side-by-side.
+### 5. **Extensible**
+Easy to add new automation frameworks or MCP tools.
 
-### 6. **Cost Optimization**
-Choose the fastest/cheapest framework for different scenarios (CI vs local vs production monitoring).
+### 6. **Production Ready**
+Clean install, no deprecation warnings, proper error handling.
 
 ## 📊 Adding New Frameworks
 
-To add support for a new framework:
+To add support for a new framework (e.g., Playwright):
 
-1. Create adapter class in `src/framework/adapters/your-framework-adapter.ts`
+1. Create `src/framework/adapters/playwright-adapter.ts`
 2. Implement `IBrowserAdapter` interface
-3. Extend `BaseBrowserAdapter`
-4. Add to `FrameworkFactory`
-5. Update `FrameworkType` enum
-6. Add npm script
-7. Update documentation
+3. Extend `BaseBrowserAdapter` base class
+4. Add to `FrameworkFactory` in `factory.ts`
+5. Update `FrameworkType` enum in `types.ts`
+6. Add as peer dependency in `package.json`
 
 Example:
+
 ```typescript
-export class PlaywrightAdapter extends BaseBrowserAdapter {
-  // Implement all IBrowserAdapter methods
-  async navigate(url: string): Promise<NavigationResult> {
-    // Playwright-specific implementation
+import { BaseBrowserAdapter } from '../base-adapter.js';
+import type { IBrowserAdapter } from '../types.js';
+
+export class PlaywrightAdapter extends BaseBrowserAdapter implements IBrowserAdapter {
+  async initialize(): Promise<void> {
+    // Playwright-specific initialization
   }
-  // ... more methods
+
+  async navigate(url: string): Promise<NavigationResult> {
+    // Playwright-specific navigation
+  }
+
+  // ... implement all interface methods
 }
+```
+
+## 🧹 Code Quality
+
+```bash
+# Linting
+npm run lint           # Check code style
+npm run lint:fix       # Auto-fix issues
+
+# Formatting
+npm run format         # Format all files
+npm run format:check   # Check without changes
+
+# Type Checking
+npm run build          # TypeScript compilation check
 ```
 
 ## 🤝 Contributing
 
 Contributions welcome! Please ensure:
 
-- All tests pass on all frameworks
-- Code follows existing style (run `npm run lint`)
-- TypeScript types are properly defined
-- Documentation is updated
+- ✅ Build passes (`npm run build`)
+- ✅ Linting passes (`npm run lint`)
+- ✅ Proper TypeScript types (no `any`)
+- ✅ Handler Registry pattern for new tools
+- ✅ Documentation updated
 
 ## 📄 License
 
@@ -386,6 +328,8 @@ MIT License - See LICENSE file for details
 
 ## 🔗 Resources
 
+- [Model Context Protocol](https://modelcontextprotocol.io/)
+- [MCP SDK Documentation](https://github.com/modelcontextprotocol/sdk)
 - [Selenium WebDriver Docs](https://www.selenium.dev/documentation/)
 - [WebDriverIO Docs](https://webdriver.io/docs/gettingstarted)
 - [Cypress Docs](https://docs.cypress.io/)
@@ -393,4 +337,4 @@ MIT License - See LICENSE file for details
 
 ---
 
-**Built with ❤️ for flexible, future-proof test automation**
+**Built with ❤️ for MCP-powered browser automation**
