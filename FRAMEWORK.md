@@ -4,9 +4,9 @@
 
 This project implements a **Framework Adapter Pattern** that allows you to write tests once and run them on multiple automation frameworks:
 
-- ✅ **Selenium WebDriver** - Industry standard, direct WebDriver API
-- ✅ **WebDriverIO** - Modern, feature-rich wrapper around Selenium
-- ✅ **Cypress** - Fast, modern in-browser testing framework
+- **Selenium WebDriver** - Industry standard, direct WebDriver API
+- **WebDriverIO** - Modern, feature-rich wrapper around Selenium
+- **Cypress** - Fast, modern in-browser testing framework
 
 ## Architecture
 
@@ -388,10 +388,10 @@ Generally:
 
 ### 1. Use CSS Selectors When Possible
 ```typescript
-// ✅ Good - works on all frameworks
+// Good - works on all frameworks
 await browser.click('.submit-button');
 
-// ❌ Avoid - XPath not supported in Cypress
+// Avoid - XPath not supported in Cypress
 await browser.click('//button[@class="submit-button"]');
 ```
 
@@ -413,11 +413,11 @@ after(async () => {
 
 ### 4. Use Explicit Waits
 ```typescript
-// ✅ Good
+// Good
 await browser.waitForElement('.results', { visible: true, timeout: 5000 });
 await browser.click('.results');
 
-// ❌ Bad
+// Bad
 await browser.click('.results'); // Might fail if not loaded
 ```
 

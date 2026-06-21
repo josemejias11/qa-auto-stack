@@ -1,8 +1,8 @@
 # QA Automation Stack - MCP Server
 
-🚀 **Model Context Protocol Server for Multi-Framework Browser Automation** - WebDriver automation tools accessible via MCP with support for Selenium, WebDriverIO, and Cypress.
+ **Model Context Protocol Server for Multi-Framework Browser Automation** - WebDriver automation tools accessible via MCP with support for Selenium, WebDriverIO, and Cypress.
 
-## 🎯 Overview
+##  Overview
 
 An MCP (Model Context Protocol) server that provides browser automation capabilities through a unified interface. The server exposes WebDriver automation tools that AI assistants can use to interact with web browsers.
 
@@ -13,7 +13,7 @@ An MCP (Model Context Protocol) server that provides browser automation capabili
 - **Type-Safe**: Full TypeScript implementation with proper type definitions
 - **Clean Architecture**: Handler Registry pattern for extensible tool handling
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 ### Core Dependencies
 - **@modelcontextprotocol/sdk** (^1.22.0) - MCP server implementation
@@ -30,7 +30,7 @@ An MCP (Model Context Protocol) server that provides browser automation capabili
 > npm install selenium-webdriver webdriverio cypress
 > ```
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### 1. Install Dependencies
 
@@ -64,7 +64,7 @@ npm start
 npm run mcp:server
 ```
 
-## 📋 Available Scripts
+## Available Scripts
 
 ```bash
 npm run build          # Compile TypeScript to dist/
@@ -79,7 +79,7 @@ npm run format:check   # Check formatting without changes
 npm run mcp:server     # Run MCP server with tsx
 ```
 
-## 🔌 MCP Tools
+## MCP Tools
 
 The MCP server exposes the following browser automation tools:
 
@@ -110,7 +110,7 @@ The MCP server exposes the following browser automation tools:
 ### Scroll Tools
 - `scroll_to` - Scroll to a specific element
 
-## 🏗️ Architecture
+## Architecture
 
 ### Project Structure
 
@@ -181,7 +181,7 @@ interface IBrowserAdapter {
 }
 ```
 
-## 🔧 Configuration
+## Configuration
 
 ### Framework Selection
 
@@ -213,7 +213,7 @@ HEADLESS=1                               # Headless mode
 TIMEOUT=15000                            # Custom timeout (ms)
 ```
 
-## 📦 Installation Notes
+## Installation Notes
 
 ### Why `--ignore-scripts`?
 
@@ -238,7 +238,7 @@ npm install webdriverio --save-dev
 npm install cypress --save-dev --ignore-scripts
 ```
 
-## 🔒 Type Safety
+## Type Safety
 
 All `any` types have been replaced with proper TypeScript types:
 
@@ -247,7 +247,7 @@ All `any` types have been replaced with proper TypeScript types:
 - Proper type guards for framework capabilities
 - Full type inference throughout the codebase
 
-## 🚀 Benefits
+## Benefits
 
 ### 1. **MCP Integration**
 Browser automation accessible to AI assistants via Model Context Protocol.
@@ -267,7 +267,7 @@ Easy to add new automation frameworks or MCP tools.
 ### 6. **Production Ready**
 Clean install, no deprecation warnings, proper error handling.
 
-## 📊 Adding New Frameworks
+## Adding New Frameworks
 
 To add support for a new framework (e.g., Playwright):
 
@@ -297,7 +297,7 @@ export class PlaywrightAdapter extends BaseBrowserAdapter implements IBrowserAda
 }
 ```
 
-## 🧹 Code Quality
+## Code Quality
 
 ```bash
 # Linting
@@ -312,29 +312,3 @@ npm run format:check   # Check without changes
 npm run build          # TypeScript compilation check
 ```
 
-## 🤝 Contributing
-
-Contributions welcome! Please ensure:
-
-- ✅ Build passes (`npm run build`)
-- ✅ Linting passes (`npm run lint`)
-- ✅ Proper TypeScript types (no `any`)
-- ✅ Handler Registry pattern for new tools
-- ✅ Documentation updated
-
-## 📄 License
-
-MIT License - See LICENSE file for details
-
-## 🔗 Resources
-
-- [Model Context Protocol](https://modelcontextprotocol.io/)
-- [MCP SDK Documentation](https://github.com/modelcontextprotocol/sdk)
-- [Selenium WebDriver Docs](https://www.selenium.dev/documentation/)
-- [WebDriverIO Docs](https://webdriver.io/docs/gettingstarted)
-- [Cypress Docs](https://docs.cypress.io/)
-- [FRAMEWORK.md](FRAMEWORK.md) - Detailed architecture guide
-
----
-
-**Built with ❤️ for MCP-powered browser automation**
